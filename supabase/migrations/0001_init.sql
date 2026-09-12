@@ -8,7 +8,7 @@
 -- -----------------------------------------------------------------------------
 -- 0. Extensiones
 -- En Supabase las extensiones viven en el esquema "extensions"; por eso todas
--- las llamadas a unaccent(), similarity() y gin_trgm_ops van cualificadas.
+-- las llamadas a unaccent() y a gin_trgm_ops van cualificadas.
 -- -----------------------------------------------------------------------------
 create extension if not exists pgcrypto with schema extensions;
 create extension if not exists pg_trgm  with schema extensions;
