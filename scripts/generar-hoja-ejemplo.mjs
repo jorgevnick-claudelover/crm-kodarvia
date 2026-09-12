@@ -1,0 +1,48 @@
+// Genera fixtures/hoja-ejemplo.xlsx y .csv: una hoja "sucia" que imita la del cliente
+// (cabecera en la fila 2, teléfonos en varios formatos, filas vacías, duplicados,
+// tildes, fechas mixtas, etapas que no coinciden, fila de totales).
+// Uso: node scripts/generar-hoja-ejemplo.mjs
+import * as XLSX from "xlsx"
+import { writeFileSync } from "node:fs"
+
+const cab = ["Nombre", "Empresa / Negocio", "Celular", "Correo", "RUC / DNI", "Origen", "Vendedor", "Etapa", "Monto (S/)", "Fecha", "Observaciones"]
+
+const filas = [
+  ["Juan Pérez Quispe", "Bodega Don Juan", 987654321, "juan.perez@gmail.com", "10456789012", "Referido", "Ana", "Primer contacto", 120, "12/08/2026", "Quiere factura electrónica desde setiembre"],
+  ["María Ñahui Ccama", "Peluquería Maru", "+51 987 111 222", "maru@hotmail.com", "45678912", "WhatsApp", "Luis Q.", "Contactado", "S/ 150", 45871, "Llamar por las tardes"],
+  ["Carlos Alberto Mamani", "", "51-955444333", "", "10987654321", "Facebook", "Ana", "Reunión", 200, "2026-08-15", ""],
+  ["Rosa Elena Huamán", "Restaurante La Nueva Palomino", "054-123456", "rosa@lanuevapalomino.pe", "20123456789", "Web", "Ana", "Propuesta enviada", 350.5, "03/09/2026", "Tiene 3 locales"],
+  ["Pedro Condori", "Taxi Pedro", "9 5 5 1 2 3 4 5 6", "", "", "Llamada entrante", "Luis Q.", "Negociación", "1,200", "", "Decide con su esposa"],
+  ["", "", "", "", "", "", "", "", "", "", ""],
+  ["Lucía Zegarra", "Farmacia Zegarra", "944222111 / 987000111", "lucia.zegarra@yahoo.com", "10444555666", "Referido", "Ana", "Cerrado ganado", 180, "20/08/2026", "Pagó adelantado"],
+  ["Miguel Ángel Torres", "Ferretería MAT", "987000222", "MAT@ferreteria.com", "20555666777", "Evento", "Carmen", "Perdido", 90, "25/08/2026", "Se fue con otro estudio"],
+  ["Juan Pérez Quispe", "Bodega Don Juan", 987654321, "juan.perez@gmail.com", "10456789012", "Referido", "Ana", "Primer contacto", 120, "12/08/2026", "FILA DUPLICADA EXACTA"],
+  ["JUAN PEREZ QUISPE", "", "+51987654321", "", "", "", "Luis Q.", "Contactado", "", "", "Mismo celular que la fila 3, nombre distinto"],
+  ["Elena Vilca", "", "", "", "", "Redes sociales", "", "", "", "", "Solo tenemos el nombre, contacto en feria"],
+  ["", "", "", "", "", "", "", "", "", "", "Pendiente: buscar el número del señor de la panadería de Cayma"],
+  ["Sofía Apaza Larico", "Consultorio Dental Apaza", 999888777, "sofia.apaza@gmail.com", "10777888999", "Web", "Ana", "Propuesta enviada", 250, "01/09/2026", ""],
+  ["Jorge Luis Cáceres", "JL Transportes SAC", "(054) 654321", "jorge@jltransportes.com", "20999888777", "Referido", "Luis Q.", "Reunión", 480, "28/08/2026", "Flota de 6 camiones"],
+  ["Ana María Choque", "Minimarket Anita", "987 555 444", "", "10111222333", "WhatsApp", "Ana", "Contactado", 130, "05/09/2026", ""],
+  ["  Roberto Salas  ", "Roberto Salas Abogado", "958777666", "rsalas@abogados.pe", "10222333444", "Referido", "Luis Q.", "Negociación", "S/ 320.00", "07/09/2026", "Espacios al inicio y al final del nombre"],
+  ["Patricia Núñez", "", "", "patricia.nunez@gmail.com", "", "Web", "Ana", "Primer contacto", 100, "08/09/2026", "Sin celular, solo correo"],
+  ["Diego Ramos", "Gimnasio Fuerza", "0051987123123", "diego@fuerza.pe", "20333444555", "Redes sociales", "Ana", "Contactado", 220, "09/09/2026", "Prefijo 0051"],
+  ["Valeria Cruz", "Boutique Vale", "987123123", "valeria@boutiquevale.com", "10333444555", "Evento", "Luis Q.", "Reunión", 160, "10/09/2026", "Mismo celular que Diego (comparten negocio familiar)"],
+  ["Ricardo Flores", "", "912345678", "", "", "Llamada entrante", "Carmen", "", "", "", "Vendedora Carmen ya no trabaja aquí"],
+  ["", "", "", "", "", "", "", "", "", "", ""],
+  ["TOTAL", "", "", "", "", "", "", "", 4020.5, "", "Suma del mes"],
+]
+
+const aoa = [["Clientes y prospectos 2026", "", "", "", "", "", "", "", "", "", ""], cab, ...filas]
+const ws = XLSX.utils.aoa_to_sheet(aoa)
+// La celda de fecha 45871 debe ser una fecha real de Excel
+const dir = XLSX.utils.encode_cell({ r: 3, c: 9 })
+ws[dir] = { t: "n", v: 45871, z: "dd/mm/yyyy" }
+const wb = XLSX.utils.book_new()
+XLSX.utils.book_append_sheet(wb, ws, "Contactos")
+XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Notas sueltas"], ["Recordar renovar dominio"], ["Pedir logo a diseñador"]]), "Notas")
+XLSX.writeFile(wb, "fixtures/hoja-ejemplo.xlsx")
+writeFileSync("fixtures/hoja-ejemplo.csv", "﻿" + XLSX.utils.sheet_to_csv(ws, { FS: "," }))
+
+const noVacias = filas.filter(f => f.some(c => String(c ?? "").trim() !== "")).length
+console.log(`filas de datos (incluidas vacías): ${filas.length}`)
+console.log(`filas no vacías: ${noVacias}`)
