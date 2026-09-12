@@ -136,7 +136,10 @@ vi.mock("@/lib/api/comun", () => ({
     oportunidadesConVencida: new Set<string>(["op2"]),
   }),
 }))
-vi.mock("@/lib/api/tareas", () => ({ listar: async () => [] }))
+vi.mock("@/lib/api/tareas", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api/tareas")>()),
+  listar: async () => [],
+}))
 vi.mock("@/lib/api/actividades", () => ({ listarPorContacto: async () => [] }))
 vi.mock("@/lib/api/contactos", () => ({ obtener: async () => contacto, buscarRapido: async () => [] }))
 
