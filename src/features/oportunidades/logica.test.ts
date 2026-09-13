@@ -74,6 +74,19 @@ describe("calcularPosicionDestino", () => {
   it("soltar sobre sí misma no cambia de sitio (al final de las demás)", () => {
     expect(calcularPosicionDestino(columna, "c", "c")).toBe(3)
   })
+  it("con posiciones empatadas devuelve un valor distinto del actual (no es un no-op)", () => {
+    const empatada = [
+      { id: "a", posicion: 0 },
+      { id: "b", posicion: 0 },
+      { id: "c", posicion: 0 },
+    ]
+    const bajando = calcularPosicionDestino(empatada, "a", "b")
+    expect(bajando).not.toBe(0)
+    expect(bajando).toBeGreaterThan(0)
+    const subiendo = calcularPosicionDestino(empatada, "c", "b")
+    expect(subiendo).not.toBe(0)
+    expect(subiendo).toBeLessThan(0)
+  })
 })
 
 describe("suma y agrupación por columna", () => {

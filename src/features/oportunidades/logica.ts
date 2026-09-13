@@ -63,7 +63,15 @@ export function calcularPosicionDestino(
   const veniaDeArriba = indiceActivo !== -1 && indiceActivo < indiceSobre
   const anterior = veniaDeArriba ? sinActivo[indice] : sinActivo[indice - 1]
   const siguiente = veniaDeArriba ? sinActivo[indice + 1] : sinActivo[indice]
-  return posicionEntre(anterior?.posicion ?? null, siguiente?.posicion ?? null)
+  const posAnterior = anterior?.posicion ?? null
+  const posSiguiente = siguiente?.posicion ?? null
+  // Vecinas empatadas (filas antiguas nacidas todas con la misma posición): no hay hueco
+  // fraccionario, así que se desplaza medio punto en el sentido del arrastre para que
+  // soltar no devuelva la posición actual y la mutación no se descarte en silencio.
+  if (posAnterior !== null && posSiguiente !== null && posAnterior === posSiguiente) {
+    return veniaDeArriba ? posAnterior + 0.5 : posAnterior - 0.5
+  }
+  return posicionEntre(posAnterior, posSiguiente)
 }
 
 /** Suma de importes (ignora valores no numéricos). */

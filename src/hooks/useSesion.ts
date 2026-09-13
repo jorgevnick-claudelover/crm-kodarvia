@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react"
 import type { Session } from "@supabase/supabase-js"
+import type { QueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { supabase, supabaseConfigurado } from "@/lib/supabase"
+import { olvidarAvisos } from "@/features/tareas/AvisoRecordatorios"
 
 export interface EstadoSesion {
   sesion: Session | null
@@ -35,9 +38,16 @@ export function useSesion(): EstadoSesion {
   return estado
 }
 
-/** Cierra la sesión y limpia la caché local de consultas. */
-export async function cerrarSesion(): Promise<void> {
+/**
+ * Cierra la sesión y limpia la caché de consultas (memoria y disco) más los avisos ya mostrados,
+ * para que el siguiente usuario de la misma pestaña no vea nada del anterior (criterio 4).
+ */
+export async function cerrarSesion(queryClient: QueryClient): Promise<void> {
   await supabase.auth.signOut()
+  queryClient.clear()
+  // Descarta los toasts de recordatorio, que se muestran con duration: Infinity.
+  toast.dismiss()
+  olvidarAvisos()
   try {
     localStorage.removeItem("crm.cache")
   } catch {

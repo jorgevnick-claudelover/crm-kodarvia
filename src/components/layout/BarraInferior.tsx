@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
+import { useQueryClient } from "@tanstack/react-query"
 import { LogOut, MoreHorizontal } from "lucide-react"
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import { AvatarUsuario } from "@/components/comunes/AvatarUsuario"
@@ -12,6 +13,7 @@ import { NAVEGACION_MAS, NAVEGACION_MOVIL, rutaActiva } from "./navegacion"
 export function BarraInferior() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { usuario, esAdmin } = useUsuarioActual()
   const [masAbierto, setMasAbierto] = useState(false)
   const masActivo = NAVEGACION_MAS.some((i) => rutaActiva(pathname, i.ruta))
@@ -23,7 +25,7 @@ export function BarraInferior() {
 
   const salir = async () => {
     setMasAbierto(false)
-    await cerrarSesion()
+    await cerrarSesion(queryClient)
     navigate("/login", { replace: true })
   }
 

@@ -59,7 +59,14 @@ export function PaginaTareas() {
           {lista.isPending ? "Cargando…" : `${tareas.length} ${tareas.length === 1 ? "tarea" : "tareas"}`}
         </p>
         <div className="flex items-center gap-2">
-          <BotonExportar obtenerFilas={obtenerFilas} columnas={COLUMNAS_EXPORTACION_TAREAS} nombreBase="tareas" filtros={filtros} size="lg" />
+          <BotonExportar
+            obtenerFilas={obtenerFilas}
+            columnas={COLUMNAS_EXPORTACION_TAREAS}
+            nombreBase="tareas"
+            filtros={filtros}
+            total={lista.isPending ? undefined : tareas.length}
+            size="lg"
+          />
           <Button type="button" size="lg" className="min-h-11" onClick={() => setNuevaAbierta(true)}>
             <Plus />
             Nueva tarea

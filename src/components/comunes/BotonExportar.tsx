@@ -18,9 +18,11 @@ export interface BotonExportarProps {
   size?: "sm" | "default" | "lg"
   /** Texto del botón; por defecto "Exportar". */
   texto?: string
+  /** Filas que se exportarán con los filtros actuales. */
+  total?: number
 }
 
-/** Exporta a CSV lo que muestra la lista (criterio 7). Muestra cuántas filas exportó. */
+/** Exporta a CSV lo que muestra la lista (criterio 7). Muestra cuántas filas exportará. */
 export function BotonExportar({
   obtenerFilas,
   columnas,
@@ -30,15 +32,14 @@ export function BotonExportar({
   variant = "outline",
   size = "default",
   texto = "Exportar",
+  total,
 }: BotonExportarProps) {
   const [cargando, setCargando] = useState(false)
-  const [ultimo, setUltimo] = useState<number | null>(null)
 
   const exportar = async () => {
     setCargando(true)
     try {
       const filas = await obtenerFilas()
-      setUltimo(filas.length)
       if (filas.length === 0) {
         toast.info("No hay filas que exportar con estos filtros.")
         return
@@ -65,7 +66,7 @@ export function BotonExportar({
     >
       {cargando ? <Loader2 className="animate-spin" /> : <Download />}
       {texto}
-      {ultimo !== null && !cargando && <span className="text-muted-foreground">({ultimo})</span>}
+      {typeof total === "number" && <span className="text-muted-foreground">({total})</span>}
     </Button>
   )
 }

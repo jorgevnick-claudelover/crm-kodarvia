@@ -113,6 +113,7 @@ export function useImportacion(): Importacion4Pasos {
   const [errorArchivo, setErrorArchivo] = useState<string | null>(null)
   const [progreso, setProgreso] = useState<ProgresoImportacion | null>(null)
   const [resultado, setResultado] = useState<ResultadoEjecucion | null>(null)
+  const [escribiendo, setEscribiendo] = useState(false)
 
   const hoja = hojas[hojaIndice] ?? null
 
@@ -153,10 +154,13 @@ export function useImportacion(): Importacion4Pasos {
   )
 
   // Contactos que ya están en el CRM: una sola lectura, al llegar a la previsualización.
+  // Se congela mientras se escribe (y cuando ya hay resultado): cada lote insertado
+  // dispara realtime, que invalida ["contactos"] y volvería a bajar la tabla entera en
+  // mitad de la importación. Deshabilitada, la consulta sigue sirviendo lo cacheado.
   const consultaExistentes = useQuery({
     queryKey: ["contactos", "importar", "existentes"],
     queryFn: () => apiContactos.listarTodo({}),
-    enabled: paso >= 3 && hojas.length > 0,
+    enabled: paso >= 3 && hojas.length > 0 && !escribiendo && resultado === null,
     staleTime: 5 * 60 * 1000,
   })
   const existentes = useMemo<Contacto[]>(() => consultaExistentes.data ?? [], [consultaExistentes.data])
@@ -256,6 +260,8 @@ export function useImportacion(): Importacion4Pasos {
   )
 
   const mutacion = useMutation({
+    onMutate: () => setEscribiendo(true),
+    onSettled: () => setEscribiendo(false),
     mutationFn: async () => {
       if (!plan || !hoja) throw new Error("Todavía no hay nada que importar.")
       if (!uid) throw new Error("No se pudo identificar al usuario.")

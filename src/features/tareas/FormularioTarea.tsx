@@ -57,7 +57,7 @@ export function FormularioTarea({ abierto, onCerrar, contactoId, oportunidadId, 
   const [responsableId, setResponsableId] = useState<string | null>(null)
   const [confirmarBorrado, setConfirmarBorrado] = useState(false)
 
-  const { abiertas } = useOportunidadesAbiertas(contacto?.id)
+  const { abiertas, cargando } = useOportunidadesAbiertas(contacto?.id)
   const guardando = crear.isPending || actualizar.isPending || eliminar.isPending
 
   // Estado inicial cada vez que se abre (crear: valores por defecto; editar: los de la tarea).
@@ -99,11 +99,14 @@ export function FormularioTarea({ abierto, onCerrar, contactoId, oportunidadId, 
     if (!tituloEditado) setTitulo(tituloPorDefecto(contacto?.nombre))
   }, [contacto?.nombre, tituloEditado])
 
-  // Si el contacto tiene una sola oportunidad abierta, se vincula sola.
+  // Si el contacto tiene una sola oportunidad abierta, se vincula sola. La oportunidad retenida
+  // (la de la ruta o la de la tarea que se edita) solo sobrevive si es de este contacto.
   useEffect(() => {
-    if (abiertas.length === 1) setOportunidad((actual) => actual ?? abiertas[0].id)
-    else if (abiertas.length === 0) setOportunidad((actual) => (actual === oportunidadId ? actual : null))
-  }, [abiertas, oportunidadId])
+    if (!contacto || cargando) return
+    setOportunidad((actual) =>
+      actual && abiertas.some((o) => o.id === actual) ? actual : abiertas.length === 1 ? abiertas[0].id : null,
+    )
+  }, [abiertas, cargando, contacto?.id])
 
   const cambiarContacto = (c: Contacto | null) => {
     setContacto(c)
@@ -176,9 +179,13 @@ export function FormularioTarea({ abierto, onCerrar, contactoId, oportunidadId, 
 
   const puedeEditarResponsable = esAdmin && usuarios.length > 0
   const puedeBorrar = editando && (esAdmin || tarea?.responsable_id === uid)
+  // La tarea de otro se puede consultar, pero no guardar: es lo que permite la RLS.
+  const soloLectura = editando && !esAdmin && tarea?.responsable_id !== uid
+  // En edición el contacto llega de la consulta: guardar antes lo borraría (contacto_id: null).
+  const esperandoContacto = !!idContactoInicial && contactoInicial.isPending
 
   const botonGuardar = (extra?: string) => (
-    <Button type="button" size="lg" className={extra} disabled={guardando} onClick={() => void guardar()}>
+    <Button type="button" size="lg" className={extra} disabled={guardando || esperandoContacto} onClick={() => void guardar()}>
       {guardando && <Loader2 className="animate-spin" />}
       Guardar
     </Button>
@@ -190,8 +197,9 @@ export function FormularioTarea({ abierto, onCerrar, contactoId, oportunidadId, 
       onCerrar={onCerrar}
       titulo={editando ? "Editar tarea" : "Nueva tarea"}
       bloqueado={guardando}
-      accionCabecera={botonGuardar("min-h-11")}
+      accionCabecera={soloLectura ? undefined : botonGuardar("min-h-11")}
       pie={
+        soloLectura ? undefined : (
         <div className="flex w-full gap-2">
           {puedeBorrar && (
             <Button
@@ -208,15 +216,16 @@ export function FormularioTarea({ abierto, onCerrar, contactoId, oportunidadId, 
           )}
           {botonGuardar("min-h-12 flex-1 text-base")}
         </div>
+        )
       }
     >
       <form
-        className="flex flex-col gap-5"
         onSubmit={(e) => {
           e.preventDefault()
           void guardar()
         }}
       >
+        <fieldset disabled={soloLectura} className="flex min-w-0 flex-col gap-5">
         <div className="space-y-1.5">
           <Label htmlFor="tarea-titulo">Título</Label>
           <Input
@@ -235,7 +244,7 @@ export function FormularioTarea({ abierto, onCerrar, contactoId, oportunidadId, 
 
         <div className="space-y-1.5">
           <Label htmlFor="tarea-contacto">Contacto</Label>
-          {contactoFijo && contactoInicial.isPending ? (
+          {esperandoContacto ? (
             <div className="flex h-12 items-center rounded-lg border px-3 text-muted-foreground">Cargando contacto…</div>
           ) : (
             <SelectorContacto
@@ -295,6 +304,7 @@ export function FormularioTarea({ abierto, onCerrar, contactoId, oportunidadId, 
         <button type="submit" className="sr-only" tabIndex={-1}>
           Guardar
         </button>
+        </fieldset>
       </form>
     </PanelFormulario>
   )

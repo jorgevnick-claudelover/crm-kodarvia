@@ -7,6 +7,7 @@ import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { AvatarUsuario } from "@/components/comunes/AvatarUsuario"
 import { EnlaceTelefono } from "@/components/comunes/EnlaceTelefono"
+import { useUsuarioActual } from "@/hooks/useUsuarioActual"
 import type { TareaConRelaciones } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { etiquetaRelativaConHora, formatearHora } from "@/lib/utils/fechas"
@@ -24,6 +25,9 @@ export interface FilaTareaProps {
 
 export function FilaTarea({ tarea, onEditar, formatoFecha = "relativa", className }: FilaTareaProps) {
   const { completar, reabrir } = useMutacionesTareas()
+  const { uid, esAdmin } = useUsuarioActual()
+  // Solo el responsable (o el admin) puede marcarla, deshacerla o editarla: es lo que permite la RLS.
+  const puedeEditar = esAdmin || tarea.responsable_id === uid
   const hecha = tarea.estado === "hecha"
   const vencida = estaVencida(tarea)
   const ocupada = completar.isPending || reabrir.isPending
@@ -31,27 +35,42 @@ export function FilaTarea({ tarea, onEditar, formatoFecha = "relativa", classNam
 
   return (
     <li className={cn("flex items-start gap-3 py-3", className)}>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-lg"
-        aria-label={hecha ? "Reabrir tarea" : "Marcar como hecha"}
-        aria-pressed={hecha}
-        disabled={ocupada}
-        className={cn("size-11 shrink-0 rounded-full", hecha ? "text-emerald-600" : "text-muted-foreground hover:text-primary")}
-        onClick={() => (hecha ? reabrir.mutate(tarea.id) : completar.mutate(tarea.id))}
-      >
-        {hecha ? <Check className="size-6" /> : <Circle className="size-6" />}
-      </Button>
+      {puedeEditar ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-lg"
+          aria-label={hecha ? "Reabrir tarea" : "Marcar como hecha"}
+          aria-pressed={hecha}
+          disabled={ocupada}
+          className={cn("size-11 shrink-0 rounded-full", hecha ? "text-emerald-600" : "text-muted-foreground hover:text-primary")}
+          onClick={() => (hecha ? reabrir.mutate(tarea.id) : completar.mutate(tarea.id))}
+        >
+          {hecha ? <Check className="size-6" /> : <Circle className="size-6" />}
+        </Button>
+      ) : (
+        <span
+          aria-hidden
+          className={cn("flex size-11 shrink-0 items-center justify-center rounded-full", hecha ? "text-emerald-600" : "text-muted-foreground")}
+        >
+          {hecha ? <Check className="size-6" /> : <Circle className="size-6" />}
+        </span>
+      )}
 
       <div className="min-w-0 flex-1">
-        <button
-          type="button"
-          onClick={() => onEditar?.(tarea)}
-          className={cn("block w-full text-left text-base font-medium leading-tight", hecha && "text-muted-foreground line-through")}
-        >
-          {tarea.titulo}
-        </button>
+        {puedeEditar ? (
+          <button
+            type="button"
+            onClick={() => onEditar?.(tarea)}
+            className={cn("block w-full text-left text-base font-medium leading-tight", hecha && "text-muted-foreground line-through")}
+          >
+            {tarea.titulo}
+          </button>
+        ) : (
+          <span className={cn("block w-full text-left text-base font-medium leading-tight", hecha && "text-muted-foreground line-through")}>
+            {tarea.titulo}
+          </span>
+        )}
         <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
           <span className={cn("tabular-nums", vencida && "font-semibold text-destructive")}>{etiquetaHora}</span>
           {tarea.contacto && (
@@ -78,7 +97,7 @@ export function FilaTarea({ tarea, onEditar, formatoFecha = "relativa", classNam
 
       <div className="flex shrink-0 flex-col items-end gap-2">
         <AvatarUsuario nombre={tarea.responsable?.nombre} id={tarea.responsable_id} tamano="sm" />
-        {hecha && (
+        {hecha && puedeEditar && (
           <Button type="button" variant="ghost" size="sm" className="min-h-9" disabled={ocupada} onClick={() => reabrir.mutate(tarea.id)}>
             <RotateCcw />
             Deshacer

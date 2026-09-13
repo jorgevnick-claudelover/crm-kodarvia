@@ -14,7 +14,6 @@ import { FILTROS_TAREAS_DEFAULT } from "@/lib/api/tareas"
 import type { Tarea, TareaConRelaciones } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { etiquetaRelativaConHora } from "@/lib/utils/fechas"
-import { AvisoRecordatorios } from "@/features/tareas/AvisoRecordatorios"
 import { FilaTarea } from "@/features/tareas/FilaTarea"
 import { FormularioTarea } from "@/features/tareas/FormularioTarea"
 import { agruparParaHoy } from "@/features/tareas/logica"
@@ -131,8 +130,6 @@ export function PaginaHoy() {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4">
-      <AvisoRecordatorios />
-
       <div className="flex items-center justify-between gap-2">
         <ChipsSeleccion<Ambito> etiqueta="Ver tareas" tamano="sm" valor={ambito} onCambiar={(v) => v && setEleccion(v)} opciones={OPCIONES_AMBITO} />
         <Button type="button" size="lg" className="min-h-11" onClick={() => setNuevaAbierta(true)}>

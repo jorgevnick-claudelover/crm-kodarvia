@@ -63,6 +63,8 @@ export function aplicarFiltrosTareas<Q extends ConsultaFiltrable>(
   if (hastaIso) q = q.lte("vence_at", hastaIso)
   if ((filtros.orden ?? "vence") === "reciente") q = q.order("created_at", { ascending: false })
   else q = q.order("vence_at", { ascending: true })
+  // Desempate único: sin él fetchAll puede repetir u omitir filas al paginar.
+  q = q.order("id", { ascending: true })
   return q
 }
 
@@ -108,8 +110,9 @@ export async function crear(datos: TareaInsert): Promise<Tarea> {
 }
 
 export async function actualizar(id: string, cambios: TareaUpdate): Promise<Tarea> {
-  const { data, error } = await supabase.from("tareas").update(cambios).eq("id", id).select("*").single()
+  const { data, error } = await supabase.from("tareas").update(cambios).eq("id", id).select("*").maybeSingle()
   lanzarSi(error, "No se pudo guardar la tarea")
+  if (!data) throw new Error("No puedes guardar esto: no eres su responsable, o el registro ya no existe. Pídeselo al administrador.")
   return exigir(data)
 }
 

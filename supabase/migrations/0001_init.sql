@@ -158,7 +158,7 @@ create table public.oportunidades (
   moneda                 char(3) not null default 'PEN',
   etapa_id               uuid not null references public.etapas (id),   -- última etapa abierta; se conserva al cerrar
   estado                 text not null default 'abierta' check (estado in ('abierta', 'ganada', 'perdida')),
-  posicion               double precision not null default 0,           -- orden dentro de la columna
+  posicion               double precision not null default -extract(epoch from clock_timestamp()),  -- orden dentro de la columna: único y monótono (lo más reciente arriba)
   responsable_id         uuid not null references public.usuarios (id) default auth.uid(),
   motivo_perdida_id      uuid references public.motivos_perdida (id),
   detalle_perdida        text,

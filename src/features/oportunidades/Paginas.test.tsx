@@ -101,8 +101,10 @@ const historial: HistorialEtapa[] = [
 ]
 
 vi.mock("@/lib/supabase", () => ({ supabase: {}, supabaseConfigurado: false }))
+// Sesión mutable: algunas pruebas necesitan un miembro que no es responsable de las tarjetas.
+const sesion = vi.hoisted(() => ({ uid: "u1" as string | null, esAdmin: true }))
 vi.mock("@/hooks/useUsuarioActual", () => ({
-  useUsuarioActual: () => ({ usuario, uid: "u1", email: usuario.email, esAdmin: true, cargando: false, error: null }),
+  useUsuarioActual: () => ({ usuario, uid: sesion.uid, email: usuario.email, esAdmin: sesion.esAdmin, cargando: false, error: null }),
 }))
 vi.mock("@/lib/api/catalogos", () => ({
   listarEtapas: async () => etapas,
@@ -198,6 +200,8 @@ describe("pantallas de oportunidades (humo)", () => {
   afterEach(() => {
     act(() => root.unmount())
     contenedor.remove()
+    sesion.uid = "u1"
+    sesion.esAdmin = true
   })
 
   it("en computadora muestra el tablero con columnas, sumas y el pie de cerradas", async () => {
@@ -224,6 +228,16 @@ describe("pantallas de oportunidades (humo)", () => {
     expect(tarjetas[0].textContent).toContain("Juan Pérez")
     expect(tarjetas[0].textContent).toContain("Mover a")
     expect(tarjetas[0].textContent).toContain("Contactado")
+  })
+
+  it("en celular no ofrece mover una oportunidad de otro responsable", async () => {
+    sesion.uid = "u2"
+    sesion.esAdmin = false
+    await montar("/oportunidades", true)
+    const tarjetas = contenedor.querySelectorAll('[data-testid="tarjeta-oportunidad"]')
+    expect(tarjetas.length).toBe(1)
+    expect(tarjetas[0].textContent).toContain("Juan Pérez")
+    expect(tarjetas[0].textContent).not.toContain("Mover a")
   })
 
   it("el detalle muestra cabecera, stepper, botones e historial", async () => {

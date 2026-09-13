@@ -1,10 +1,12 @@
 import { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { KanbanSquare } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Cargando } from "@/components/comunes/Cargando"
 import { Importe } from "@/components/comunes/Importe"
 import { Vacio } from "@/components/comunes/Vacio"
 import { useCatalogos } from "@/hooks/useCatalogos"
+import { useUsuarioActual } from "@/hooks/useUsuarioActual"
 import type { FiltrosOportunidades } from "@/lib/api/oportunidades"
 import type { Etapa, EstadoOportunidad, OportunidadConRelaciones } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -25,6 +27,7 @@ export interface ListaPorEtapaProps {
 export function ListaPorEtapa({ filtros, setFiltros, className }: ListaPorEtapaProps) {
   const navigate = useNavigate()
   const { etapas } = useCatalogos()
+  const { uid, esAdmin } = useUsuarioActual()
   const indicadores = useIndicadoresTareas()
   const { moverConDeshacer } = useMoverConDeshacer()
 
@@ -60,7 +63,8 @@ export function ListaPorEtapa({ filtros, setFiltros, className }: ListaPorEtapaP
 
   const tarjetas: OportunidadConRelaciones[] =
     estado === "abierta" ? (etapaElegida ? (porEtapa.get(etapaElegida.id) ?? []) : []) : (cerradas.data ?? [])
-  const cargando = estado === "abierta" ? abiertas.isPending : cerradas.isPending
+  const consulta = estado === "abierta" ? abiertas : cerradas
+  const cargando = consulta.isPending
 
   const chipBase =
     "inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-medium whitespace-nowrap transition-colors select-none"
@@ -114,6 +118,16 @@ export function ListaPorEtapa({ filtros, setFiltros, className }: ListaPorEtapaP
 
       {cargando ? (
         <Cargando tipo="tarjetas" filas={4} />
+      ) : consulta.isError ? (
+        <Vacio
+          titulo="No se pudieron cargar las oportunidades"
+          descripcion={consulta.error instanceof Error ? consulta.error.message : undefined}
+          accion={
+            <Button type="button" variant="outline" className="min-h-11" onClick={() => void consulta.refetch()}>
+              Reintentar
+            </Button>
+          }
+        />
       ) : etapas.length === 0 && estado === "abierta" ? (
         <Vacio icono={KanbanSquare} titulo="No hay etapas configuradas" descripcion="El administrador debe crear las etapas en Configuración." />
       ) : tarjetas.length === 0 ? (
@@ -126,6 +140,8 @@ export function ListaPorEtapa({ filtros, setFiltros, className }: ListaPorEtapaP
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {tarjetas.map((o) => {
             const sig = siguienteEtapa(etapas, o.etapa_id)
+            // Mismo permiso que el tablero (Tablero.tsx): sin él la acción siempre falla por RLS.
+            const mio = esAdmin || (!!uid && o.responsable_id === uid)
             return (
               <TarjetaOportunidad
                 key={o.id}
@@ -134,9 +150,9 @@ export function ListaPorEtapa({ filtros, setFiltros, className }: ListaPorEtapaP
                 tareaVencida={indicadores.tieneVencida(o)}
                 sinTarea={indicadores.disponible && indicadores.sinTarea(o)}
                 onAbrir={() => navigate(`/oportunidades/${o.id}`)}
-                onMoverA={() => modales.abrirMoverA(o)}
+                onMoverA={mio ? () => modales.abrirMoverA(o) : undefined}
                 siguiente={sig}
-                onSiguiente={sig ? () => moverConDeshacer(o, sig, posicionAlFinal(porEtapa.get(sig.id) ?? [])) : undefined}
+                onSiguiente={mio && sig ? () => moverConDeshacer(o, sig, posicionAlFinal(porEtapa.get(sig.id) ?? [])) : undefined}
               />
             )
           })}

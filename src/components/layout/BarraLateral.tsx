@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom"
+import { useQueryClient } from "@tanstack/react-query"
 import { LogOut } from "lucide-react"
 import { AvatarUsuario } from "@/components/comunes/AvatarUsuario"
 import { Button } from "@/components/ui/button"
@@ -11,10 +12,11 @@ import { NAVEGACION, rutaActiva } from "./navegacion"
 export function BarraLateral() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { usuario, esAdmin } = useUsuarioActual()
 
   const salir = async () => {
-    await cerrarSesion()
+    await cerrarSesion(queryClient)
     navigate("/login", { replace: true })
   }
 

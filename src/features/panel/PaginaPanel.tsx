@@ -3,6 +3,7 @@ import { RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Cargando } from "@/components/comunes/Cargando"
+import { Vacio } from "@/components/comunes/Vacio"
 import { useCatalogos } from "@/hooks/useCatalogos"
 import { useFiltrosURL } from "@/hooks/useFiltrosURL"
 import { hoyLima } from "@/lib/utils/fechas"
@@ -104,6 +105,16 @@ export function PaginaPanel() {
 
       {cargando ? (
         <Cargando tipo="tarjetas" filas={5} />
+      ) : datos.error ? (
+        <Vacio
+          titulo="No se pudo cargar el panel"
+          descripcion={datos.error.message}
+          accion={
+            <Button type="button" variant="outline" className="min-h-11" onClick={() => datos.refrescar()}>
+              Reintentar
+            </Button>
+          }
+        />
       ) : (
         <>
           <TarjetasResumen resumen={resumen} responsableId={responsableId || undefined} />

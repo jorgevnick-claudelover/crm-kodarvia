@@ -73,7 +73,7 @@ export function FormularioActividad({ abierto, onCerrar, tipoInicial, contactoId
   const [guardando, setGuardando] = useState(false)
   const [creandoContacto, setCreandoContacto] = useState(false)
 
-  const { abiertas } = useOportunidadesAbiertas(contacto?.id)
+  const { abiertas, cargando } = useOportunidadesAbiertas(contacto?.id)
 
   // Valores por defecto al abrir: tipo inicial, ahora, yo.
   useEffect(() => {
@@ -113,11 +113,15 @@ export function FormularioActividad({ abierto, onCerrar, tipoInicial, contactoId
     if (!tituloEditado) setTituloProximo(tituloPorDefecto(contacto?.nombre))
   }, [contacto?.nombre, tituloEditado])
 
-  // Oportunidad automática: la única abierta; chips si hay varias; nada si ninguna.
+  // Oportunidad automática: la única abierta del contacto; chips si hay varias; nada si ninguna.
+  // Siempre se recalcula contra el contacto actual: al sustituir un contacto por otro, la
+  // oportunidad del anterior no puede sobrevivir.
   useEffect(() => {
-    if (abiertas.length === 1) setOportunidad((actual) => actual ?? abiertas[0].id)
-    else if (abiertas.length === 0) setOportunidad((actual) => (actual === oportunidadId ? actual : null))
-  }, [abiertas, oportunidadId])
+    if (!contacto || cargando) return
+    setOportunidad((actual) =>
+      actual && abiertas.some((o) => o.id === actual) ? actual : abiertas.length === 1 ? abiertas[0].id : null,
+    )
+  }, [abiertas, cargando, contacto?.id])
 
   const cambiarContacto = (c: Contacto | null) => {
     setContacto(c)

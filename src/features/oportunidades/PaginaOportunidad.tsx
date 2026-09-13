@@ -111,7 +111,10 @@ export function PaginaOportunidad() {
   const hayActividadDeEsta = (actividades.data ?? []).some((a) => a.oportunidad_id === o.id)
 
   const alReabrir = () => {
-    reabrir.mutate(o.id, { onSuccess: () => toast.success(`Reabierta en ${etapaActual?.nombre ?? "su última etapa"}.`) })
+    reabrir.mutate(o.id, {
+      // La etapa puede haber cambiado al reabrir (si la suya fue desactivada): nombramos la de la fila devuelta.
+      onSuccess: (devuelta) => toast.success(`Reabierta en ${etapaPorId(devuelta.etapa_id)?.nombre ?? etapaActual?.nombre ?? "su última etapa"}.`),
+    })
   }
   const alEliminar = () => {
     eliminar.mutate(o.id, {

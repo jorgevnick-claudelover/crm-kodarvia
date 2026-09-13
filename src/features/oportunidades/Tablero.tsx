@@ -17,6 +17,7 @@ import {
   type UniqueIdentifier,
 } from "@dnd-kit/core"
 import { KanbanSquare } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Cargando } from "@/components/comunes/Cargando"
 import { Importe } from "@/components/comunes/Importe"
 import { Vacio } from "@/components/comunes/Vacio"
@@ -157,6 +158,20 @@ export function Tablero({ filtros, className }: TableroProps) {
   const muchasColumnas = etapas.length > 5
 
   if (consulta.isPending) return <Cargando tipo="tarjetas" filas={6} className={className} />
+  if (consulta.isError) {
+    return (
+      <Vacio
+        titulo="No se pudieron cargar las oportunidades"
+        descripcion={consulta.error instanceof Error ? consulta.error.message : undefined}
+        accion={
+          <Button type="button" variant="outline" className="min-h-11" onClick={() => void consulta.refetch()}>
+            Reintentar
+          </Button>
+        }
+        className={className}
+      />
+    )
+  }
   if (etapas.length === 0) {
     return <Vacio icono={KanbanSquare} titulo="No hay etapas configuradas" descripcion="Crea las etapas en Configuración para ver el tablero." />
   }

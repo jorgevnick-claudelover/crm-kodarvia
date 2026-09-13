@@ -2,7 +2,7 @@
  * Aviso a la hora fijada: muestra un toast persistente la primera vez que aparece cada recordatorio
  * vencido mientras la app está abierta, y programa con setTimeout los que vencen en breve para
  * que salten a la hora exacta aunque el refetch de 30 s no haya ocurrido todavía.
- * Se monta en PaginaHoy; el layout puede montarlo en el futuro (no pinta nada).
+ * Se monta una sola vez en AppShell (no pinta nada) para que el aviso salte en cualquier pantalla.
  */
 import { useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
@@ -15,6 +15,11 @@ import { INTERVALO_RECORDATORIOS_MS, useRecordatorios } from "./useRecordatorios
 
 /** Ids ya avisados mientras la app está abierta (sobrevive a montar/desmontar el componente). */
 const avisados = new Set<string>()
+
+/** Olvida los avisos mostrados (al cerrar sesión, para no arrastrarlos al siguiente usuario). */
+export function olvidarAvisos(): void {
+  avisados.clear()
+}
 
 export function idToastRecordatorio(tareaId: string): string {
   return `recordatorio-${tareaId}`

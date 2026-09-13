@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { useEsMovil } from "@/hooks/useEsMovil"
 import { useRealtime } from "@/hooks/useRealtime"
+import { AvisoRecordatorios } from "@/features/tareas/AvisoRecordatorios"
 import { BarraInferior } from "./BarraInferior"
 import { BarraLateral } from "./BarraLateral"
 import { BotonMas } from "./BotonMas"
@@ -41,6 +42,7 @@ export function AppShell() {
           </>
         )}
       </div>
+      <AvisoRecordatorios />
       <Toaster />
     </TooltipProvider>
   )

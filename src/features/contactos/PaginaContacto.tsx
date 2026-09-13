@@ -126,7 +126,8 @@ function FilaOportunidad({ o }: { o: OportunidadConRelaciones }) {
   )
 }
 
-function FilaTarea({ t, onHecha, completando }: { t: TareaConRelaciones; onHecha: () => void; completando: boolean }) {
+/** Sin `onHecha` (tarea de otro) no se pinta el botón: la RLS solo deja marcarla a su responsable. */
+function FilaTarea({ t, onHecha, completando }: { t: TareaConRelaciones; onHecha?: () => void; completando: boolean }) {
   const vencida = esVencida(t.vence_at)
   return (
     <li className="flex min-h-14 items-center gap-3 rounded-xl border bg-card px-3 py-2">
@@ -138,10 +139,12 @@ function FilaTarea({ t, onHecha, completando }: { t: TareaConRelaciones; onHecha
           {t.responsable && ` · ${t.responsable.nombre}`}
         </div>
       </div>
-      <Button type="button" variant="outline" className="min-h-10 gap-1.5" onClick={onHecha} disabled={completando} aria-label={`Marcar hecha: ${t.titulo}`}>
-        {completando ? <Loader2 className="animate-spin" /> : <Check />}
-        Hecha
-      </Button>
+      {onHecha && (
+        <Button type="button" variant="outline" className="min-h-10 gap-1.5" onClick={onHecha} disabled={completando} aria-label={`Marcar hecha: ${t.titulo}`}>
+          {completando ? <Loader2 className="animate-spin" /> : <Check />}
+          Hecha
+        </Button>
+      )}
     </li>
   )
 }
@@ -364,7 +367,12 @@ export function PaginaContacto() {
         {tareas.data && tareas.data.length > 0 && (
           <ul className="space-y-2">
             {tareas.data.map((t) => (
-              <FilaTarea key={t.id} t={t} onHecha={() => void marcarHecha(t)} completando={completandoId === t.id} />
+              <FilaTarea
+                key={t.id}
+                t={t}
+                onHecha={esAdmin || t.responsable_id === uid ? () => void marcarHecha(t) : undefined}
+                completando={completandoId === t.id}
+              />
             ))}
           </ul>
         )}

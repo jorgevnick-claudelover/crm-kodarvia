@@ -87,6 +87,8 @@ export function aplicarFiltrosContactos<Q extends ConsultaFiltrable>(
     default:
       q = q.order("nombre", { ascending: true })
   }
+  // Desempate único: sin él fetchAll puede repetir u omitir filas al paginar.
+  q = q.order("id", { ascending: true })
   return q
 }
 
@@ -147,8 +149,9 @@ export async function actualizar(id: string, cambios: ContactoUpdate): Promise<C
     .update(prepararTelefono(cambios))
     .eq("id", id)
     .select("*")
-    .single()
+    .maybeSingle()
   lanzarSi(error, "No se pudo guardar el contacto")
+  if (!data) throw new Error("No puedes guardar esto: no eres su responsable, o el registro ya no existe. Pídeselo al administrador.")
   return exigir(data)
 }
 

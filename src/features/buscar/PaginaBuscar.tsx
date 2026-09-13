@@ -194,7 +194,7 @@ export function PaginaBuscar() {
             <X className="size-5" />
           </Button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto pt-3 pb-[env(safe-area-inset-bottom,0px)]">{cuerpo}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto pt-3 pb-[calc(5rem+env(safe-area-inset-bottom,0px))]">{cuerpo}</div>
         {formulario}
       </div>
     )

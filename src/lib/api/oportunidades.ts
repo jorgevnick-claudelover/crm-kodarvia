@@ -9,6 +9,7 @@ import type {
   OportunidadUpdate,
 } from "@/lib/types"
 import { filtroTextoContactos } from "./contactos"
+import { listarEtapas } from "./catalogos"
 import {
   type ConsultaFiltrable,
   escaparIlike,
@@ -141,6 +142,8 @@ export function aplicarFiltrosOportunidades<Q extends ConsultaFiltrable>(
     default:
       q = q.order("posicion", { ascending: true }).order("created_at", { ascending: false })
   }
+  // Desempate único: sin él fetchAll puede repetir u omitir filas al paginar.
+  q = q.order("id", { ascending: true })
   return q
 }
 
@@ -198,8 +201,9 @@ export async function crear(datos: OportunidadInsert): Promise<Oportunidad> {
 }
 
 export async function actualizar(id: string, cambios: OportunidadUpdate): Promise<Oportunidad> {
-  const { data, error } = await supabase.from("oportunidades").update(cambios).eq("id", id).select("*").single()
+  const { data, error } = await supabase.from("oportunidades").update(cambios).eq("id", id).select("*").maybeSingle()
   lanzarSi(error, "No se pudo guardar la oportunidad")
+  if (!data) throw new Error("No puedes guardar esto: no eres su responsable, o el registro ya no existe. Pídeselo al administrador.")
   return exigir(data)
 }
 
@@ -238,13 +242,24 @@ export async function perder(id: string, motivoId: string, detalle?: string | nu
 }
 
 export async function reabrir(id: string): Promise<Oportunidad> {
-  return actualizar(id, {
+  const cambios: OportunidadUpdate = {
     estado: "abierta",
     motivo_perdida_id: null,
     detalle_perdida: null,
     ganada_at: null,
     perdida_at: null,
-  })
+  }
+  // Si su etapa fue desactivada mientras estaba cerrada, volvería invisible en el tablero: la reubicamos en la primera activa.
+  const [actual, etapasActivas] = await Promise.all([
+    supabase.from("oportunidades").select("etapa_id").eq("id", id).maybeSingle(),
+    listarEtapas(),
+  ])
+  lanzarSi(actual.error, "No se pudo reabrir la oportunidad")
+  const primeraActiva = etapasActivas[0]
+  if (actual.data && primeraActiva && !etapasActivas.some((e) => e.id === actual.data?.etapa_id)) {
+    cambios.etapa_id = primeraActiva.id
+  }
+  return actualizar(id, cambios)
 }
 
 /** Historial de etapas de una oportunidad (para el detalle). */

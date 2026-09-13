@@ -80,6 +80,7 @@ export function PaginaContactos() {
           filtros={{ ...filtrosEfectivos, orden: filtrosEfectivos.orden === "nombre" ? "" : filtrosEfectivos.orden }}
           columnas={COLUMNAS_EXPORTACION_CONTACTOS}
           obtenerFilas={async () => (await apiContactos.listarTodo(filtrosEfectivos)).map(filaExportacionContacto)}
+          total={lista.cargando || cargandoUsuario || lista.error ? undefined : lista.total}
           texto={esMovil ? "CSV" : "Exportar"}
           className="min-h-11"
         />
