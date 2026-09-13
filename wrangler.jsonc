@@ -1,0 +1,12 @@
+{
+  // Configuración de despliegue en Cloudflare (Workers con recursos estáticos).
+  // La app es una SPA: cualquier ruta que no sea un archivo debe servir index.html
+  // para que /contactos, /oportunidades, etc. funcionen al recargar o al entrar directo.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "crm-kodarvia",
+  "compatibility_date": "2026-09-13",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
