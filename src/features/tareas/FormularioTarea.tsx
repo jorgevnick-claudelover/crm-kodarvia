@@ -101,12 +101,16 @@ export function FormularioTarea({ abierto, onCerrar, contactoId, oportunidadId, 
 
   // Si el contacto tiene una sola oportunidad abierta, se vincula sola. La oportunidad retenida
   // (la de la ruta o la de la tarea que se edita) solo sobrevive si es de este contacto.
+  // La que llega fijada por la ruta se respeta aunque esté ganada o perdida: "Tarea" desde una
+  // oportunidad cerrada (volver a intentarlo más adelante) debe seguir ligada a ella.
   useEffect(() => {
     if (!contacto || cargando) return
-    setOportunidad((actual) =>
-      actual && abiertas.some((o) => o.id === actual) ? actual : abiertas.length === 1 ? abiertas[0].id : null,
-    )
-  }, [abiertas, cargando, contacto?.id])
+    const fijada = oportunidadId ?? tarea?.oportunidad_id ?? null
+    setOportunidad((actual) => {
+      if (actual && (actual === fijada || abiertas.some((o) => o.id === actual))) return actual
+      return abiertas.length === 1 ? abiertas[0].id : null
+    })
+  }, [abiertas, cargando, contacto?.id, oportunidadId, tarea?.oportunidad_id])
 
   const cambiarContacto = (c: Contacto | null) => {
     setContacto(c)
