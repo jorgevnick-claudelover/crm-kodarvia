@@ -5,16 +5,16 @@ Se marca cada punto antes de enviar la entrega a Kodarvia. Fecha límite: 3 de o
 ## Cuentas y propiedad
 
 - [ ] Decidido con Kodarvia y el cliente en qué cuentas viven el repositorio, Supabase y Cloudflare Pages (ver PREGUNTAS.md).
-- [ ] Repositorio en GitHub creado desde esta carpeta (`git remote add origin ... && git push -u origin main`) y con acceso para el equipo revisor de Kodarvia.
-- [ ] Proyecto Supabase creado (plan Free, región `sa-east-1` o `us-east-1`).
-- [ ] Proyecto de Cloudflare Pages conectado al repositorio: comando `npm run build`, carpeta `dist`, variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
+- [x] Repositorio en GitHub: https://github.com/jorgevnick-claudelover/crm-kodarvia (2026-09-13). Falta dar acceso al equipo revisor de Kodarvia.
+- [x] Proyecto Supabase `crm-gestoria`, plan Free, región São Paulo (2026-09-13).
+- [x] Cloudflare (Workers con recursos estáticos) conectado al repositorio, con las dos variables. URL pública: https://crm-kodarvia.jorgevnick.workers.dev
 - [ ] Anotado quién paga hosting y base de datos tras la entrega (hoy todo es gratuito).
 
 ## Base de datos
 
-- [ ] `supabase/migrations/0001_init.sql` aplicado en el SQL Editor sin errores.
-- [ ] `supabase/seed.sql` aplicado (etapas, motivos, orígenes y configuración de ejemplo).
-- [ ] `supabase/tests/comprobaciones.sql` ejecutado y todas las comprobaciones en verde.
+- [x] `supabase/migrations/0001_init.sql` aplicado sin errores (2026-09-13).
+- [x] `supabase/seed.sql` aplicado.
+- [x] `supabase/tests/comprobaciones.sql` ejecutado, 17 comprobaciones en verde.
 - [ ] `configuracion.url_app` actualizado con la URL real de la app (para los enlaces de los correos).
 - [ ] Etapas, motivos de pérdida y orígenes sustituidos por los reales del cliente desde Configuración.
 - [ ] Ping programado para que el proyecto Free no se pause (ver `supabase/README.md`) y copia de seguridad probada una vez.
@@ -22,7 +22,7 @@ Se marca cada punto antes de enviar la entrega a Kodarvia. Fecha límite: 3 de o
 ## Usuarios
 
 - [ ] Usuarios reales creados con `scripts/crear-usuarios.mjs` (hasta 5) y el administrador marcado como `admin`.
-- [ ] Usuarios de prueba para la revisión (admin, dos miembros) creados y sus contraseñas enviadas a Kodarvia por canal privado.
+- [x] Usuarios de prueba creados: admin@ejemplo.pe, ana@ejemplo.pe, luis@ejemplo.pe. Falta enviar las contraseñas a Kodarvia por canal privado.
 - [ ] Cada persona ha iniciado sesión al menos una vez desde su celular y ha instalado la app en la pantalla de inicio.
 
 ## Integración con Kodarvia (correo)
@@ -55,3 +55,20 @@ Se marca cada punto antes de enviar la entrega a Kodarvia. Fecha límite: 3 de o
 - [ ] Guía de uso de una página entregada (`docs/GUIA.md` y pantalla Ayuda en la app).
 - [ ] Contrato de recordatorios entregado.
 - [ ] Ficha del proyecto en el Segundo Cerebro actualizada con decisiones, fechas y aprendizajes.
+
+## Verificación de los criterios contra la base real (2026-09-13)
+
+Hecha con datos reales en Supabase y con la app desplegada, no sobre el papel.
+
+| # | Criterio | Cómo se comprobó | Estado |
+|---|---|---|---|
+| 1 | Menos de un minuto | Contacto + oportunidad en 25,8 s cronometrados | ✅ |
+| 2 | Al instante para todos | Segunda sesión actualizada en menos de 3 s sin recargar | ✅ |
+| 3 | Perder exige motivo | La API devuelve 400 con `oportunidades_perdida_con_motivo` | ✅ |
+| 4 | Recordatorio a su hora | 09:31 Lima guardado como 14:31 UTC, avisó puntual en otra pantalla | ✅ |
+| 5 | Cada uno edita lo suyo | Sesión real de Ana: 0 filas modificadas al editar lo ajeno, 403 al crear etapa | ✅ |
+| 6 | Sin perder filas | 20 no vacías, 0 descartadas, 11 creadas, 1 fusionada, 8 para revisar | ✅ |
+| 7 | Exportación con filtros | Pantalla 19 = botón CSV(19) = 19 filas, con BOM y fechas de Lima | ✅ |
+| 8 | Repo y URL funcionando | 20 commits en GitHub, URL pública sirviendo la app y hablando con Supabase | ✅ |
+
+Pendiente de la entrega: dar acceso al revisor de Kodarvia, enviarle las contraseñas de prueba, importar la hoja real del cliente y grabar los vídeos de evidencia.
