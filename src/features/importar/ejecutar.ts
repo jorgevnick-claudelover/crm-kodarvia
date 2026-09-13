@@ -75,6 +75,7 @@ function textoPorClave(valores: ValorCatalogo[]): Map<string, string> {
 /** Ejecuta la importación completa. Lanza Error con mensaje en español si algo falla. */
 export async function ejecutarImportacion(opciones: OpcionesEjecucion): Promise<ResultadoEjecucion> {
   const { plan, catalogos, equivalencias, valores, existentes } = opciones
+  const ahora = new Date().toISOString()
   const conContacto = plan.filas.filter((p) => p.contacto !== null)
   const fusiones = plan.filas.filter((p) => p.resultado === "fusionado" && p.fusionarCon)
   const conOportunidad = plan.filas.filter((p) => p.oportunidad !== null)
@@ -163,7 +164,9 @@ export async function ejecutarImportacion(opciones: OpcionesEjecucion): Promise<
       importacion_id: importacion.id,
       fila_origen: p.fila,
       requiere_revision: c.requiere_revision,
-      ...(c.created_at ? { created_at: c.created_at } : {}),
+      // Siempre presente: en una inserción por lotes PostgREST unifica las claves de todas
+      // las filas y rellena con NULL las que falten, saltándose el default de la columna.
+      created_at: c.created_at ?? ahora,
     })
   }
   avisar(`Creando ${inserts.length} contactos`)
@@ -208,7 +211,7 @@ export async function ejecutarImportacion(opciones: OpcionesEjecucion): Promise<
     else if (o.etapa?.tipo === "crear") etapaId = idEtapa.get(claveValor(p.datos.etapa)) ?? null
     etapaId = etapaId ?? primeraEtapa
     if (!etapaId) continue // Sin etapas configuradas no hay oportunidad que crear.
-    const cierre = o.created_at ?? new Date().toISOString()
+    const cierre = o.created_at ?? ahora
     oportunidades.push({
       contacto_id: contactoId,
       titulo: o.titulo,
@@ -220,7 +223,7 @@ export async function ejecutarImportacion(opciones: OpcionesEjecucion): Promise<
       detalle_perdida: o.estado === "perdida" ? "Importado sin motivo" : null,
       ganada_at: o.estado === "ganada" ? cierre : null,
       perdida_at: o.estado === "perdida" ? cierre : null,
-      ...(o.created_at ? { created_at: o.created_at } : {}),
+      created_at: o.created_at ?? ahora,
     })
   }
   if (oportunidades.length > 0) {
