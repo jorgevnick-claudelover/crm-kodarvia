@@ -152,13 +152,16 @@ describe("PaginaConfiguracion", () => {
 })
 
 describe("PestanaUsuarios", () => {
-  it("lista los usuarios y no deja al admin actual cambiarse el rol ni desactivarse", async () => {
+  it("lista los usuarios con nombre y correo editables, y no deja al admin actual cambiarse el rol ni desactivarse", async () => {
     await renderizar(<PestanaUsuarios />)
     const texto = contenedor.textContent ?? ""
-    expect(texto).toContain("Rosa Quispe")
-    expect(texto).toContain("luis@estudio.pe")
     expect(texto).toContain("no tiene contraseñas")
     expect(texto).toContain("5 personas")
+    // El nombre y el correo son campos: el cliente pone aquí a su equipo real.
+    const valor = (etiqueta: string) =>
+      contenedor.querySelector<HTMLInputElement>(`input[aria-label="${etiqueta}"]`)?.value
+    expect(valor("Nombre de Rosa Quispe")).toBe("Rosa Quispe")
+    expect(valor("Correo de Luis Mamani")).toBe("luis@estudio.pe")
     const propioRol = contenedor.querySelector<HTMLButtonElement>('[aria-label="Rol de Rosa Quispe"]')
     const propioActivo = contenedor.querySelector<HTMLButtonElement>("#usuario-activo-u1")
     const otroActivo = contenedor.querySelector<HTMLButtonElement>("#usuario-activo-u2")

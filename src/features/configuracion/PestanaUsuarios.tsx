@@ -1,6 +1,7 @@
 /**
- * Usuarios del estudio: nombre, correo, rol y activo. Los cinco vienen con los datos
- * de ejemplo del navegador; desde aquí se cambian rol y acceso, no se dan de alta.
+ * Usuarios del estudio: nombre, correo, rol y activo. Los cinco vienen con nombres de
+ * ejemplo y el administrador los renombra aquí para poner a su equipo real. Sin backend
+ * no se dan de alta usuarios nuevos: se reaprovechan estas cinco fichas.
  * El administrador actual no puede quitarse el rol a sí mismo.
  */
 import { toast } from "sonner"
@@ -8,6 +9,7 @@ import { Info } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AvatarUsuario } from "@/components/comunes/AvatarUsuario"
 import { Cargando } from "@/components/comunes/Cargando"
@@ -24,7 +26,7 @@ const AVISO_PROPIO = "No puedes cambiarte el rol ni desactivarte a ti mismo: pí
 export function PestanaUsuarios() {
   const { usuariosTodos, cargando } = useCatalogos()
   const { uid } = useUsuarioActual()
-  const { cambiarRol, cambiarActivo, guardando } = useMutacionesUsuarios()
+  const { cambiarRol, cambiarActivo, cambiarNombre, cambiarEmail, guardando } = useMutacionesUsuarios()
   const esMovil = useEsMovil()
 
   const alCambiarRol = (usuario: Usuario, rol: RolUsuario) => {
@@ -34,6 +36,36 @@ export function PestanaUsuarios() {
       return
     }
     void cambiarRol(usuario.id, rol)
+  }
+
+  /** Guarda al salir del campo o con Enter; si queda vacío se revierte al valor anterior. */
+  const campoTexto = (usuario: Usuario, campo: "nombre" | "email") => {
+    const valor = campo === "nombre" ? usuario.nombre : usuario.email
+    const guardarCampo = (nuevo: string, elemento: HTMLInputElement) => {
+      const limpio = nuevo.trim()
+      if (limpio === valor) return
+      if (!limpio) {
+        elemento.value = valor
+        toast.error(campo === "nombre" ? "El nombre no puede quedar vacío." : "El correo no puede quedar vacío.")
+        return
+      }
+      void (campo === "nombre" ? cambiarNombre(usuario.id, limpio) : cambiarEmail(usuario.id, limpio))
+    }
+    return (
+      <Input
+        defaultValue={valor}
+        key={`${usuario.id}-${campo}-${valor}`}
+        disabled={guardando}
+        aria-label={`${campo === "nombre" ? "Nombre" : "Correo"} de ${usuario.nombre}`}
+        type={campo === "email" ? "email" : "text"}
+        className="h-11 text-base"
+        onBlur={(e) => guardarCampo(e.target.value, e.target)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur()
+          if (e.key === "Escape") e.currentTarget.value = valor
+        }}
+      />
+    )
   }
 
   const alCambiarActivo = (usuario: Usuario, activo: boolean) => {
@@ -52,7 +84,7 @@ export function PestanaUsuarios() {
           Esta versión no tiene contraseñas: al abrir el CRM se elige con quién trabajar entre las personas de esta lista, que
           vienen con los datos de ejemplo de este navegador.
         </p>
-        <p>El encargo cubre hasta 5 personas. Para dejar de dar acceso a alguien, desactívalo aquí; así se conserva su historial.</p>
+        <p>Pon aquí los nombres y correos reales de tu equipo: escribe encima y se guarda al salir del campo. El encargo cubre hasta 5 personas. Para dejar de dar acceso a alguien, desactívalo aquí; así se conserva su historial.</p>
       </div>
     </div>
   )
@@ -121,13 +153,18 @@ export function PestanaUsuarios() {
             <li key={u.id} className="space-y-3 rounded-xl border bg-card p-3">
               <div className="flex items-center gap-3">
                 <AvatarUsuario nombre={u.nombre} id={u.id} />
-                <div className="min-w-0">
-                  <p className="truncate font-medium">
-                    {u.nombre}
-                    {u.id === uid && <span className="ml-2 text-xs text-muted-foreground">(tú)</span>}
-                  </p>
-                  <p className="truncate text-sm text-muted-foreground">{u.email}</p>
-                </div>
+                <p className="truncate font-medium">
+                  {u.nombre}
+                  {u.id === uid && <span className="ml-2 text-xs text-muted-foreground">(tú)</span>}
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm text-muted-foreground">Nombre</Label>
+                {campoTexto(u, "nombre")}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm text-muted-foreground">Correo</Label>
+                {campoTexto(u, "email")}
               </div>
               <div className="space-y-1.5">
                 <Label className="text-sm text-muted-foreground">Rol</Label>
@@ -155,11 +192,11 @@ export function PestanaUsuarios() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <AvatarUsuario nombre={u.nombre} id={u.id} tamano="sm" />
-                      <span className="font-medium">{u.nombre}</span>
+                      <div className="min-w-44 flex-1">{campoTexto(u, "nombre")}</div>
                       {u.id === uid && <span className="text-xs text-muted-foreground">(tú)</span>}
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{u.email}</TableCell>
+                  <TableCell className="min-w-52">{campoTexto(u, "email")}</TableCell>
                   <TableCell>{selectorRol(u)}</TableCell>
                   <TableCell>{interruptorActivo(u)}</TableCell>
                 </TableRow>

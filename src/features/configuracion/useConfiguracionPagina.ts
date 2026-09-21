@@ -175,9 +175,14 @@ export function useComprobarEtapaDesactivable(): (etapaId: string) => Promise<nu
   )
 }
 
+/** Lo que la pantalla de Configuración puede cambiar de un usuario. */
+type CambiosUsuario = { rol?: RolUsuario; activo?: boolean; nombre?: string; email?: string }
+
 export interface MutacionesUsuarios {
   cambiarRol: (id: string, rol: RolUsuario) => Promise<boolean>
   cambiarActivo: (id: string, activo: boolean) => Promise<boolean>
+  cambiarNombre: (id: string, nombre: string) => Promise<boolean>
+  cambiarEmail: (id: string, email: string) => Promise<boolean>
   guardando: boolean
 }
 
@@ -185,14 +190,13 @@ export interface MutacionesUsuarios {
 export function useMutacionesUsuarios(): MutacionesUsuarios {
   const queryClient = useQueryClient()
   const guardar = useMutation({
-    mutationFn: ({ id, cambios }: { id: string; cambios: { rol?: RolUsuario; activo?: boolean } }) =>
-      apiUsuarios.actualizar(id, cambios),
+    mutationFn: ({ id, cambios }: { id: string; cambios: CambiosUsuario }) => apiUsuarios.actualizar(id, cambios),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["usuarios"] })
     },
   })
 
-  const aplicar = async (id: string, cambios: { rol?: RolUsuario; activo?: boolean }, porDefecto: string) => {
+  const aplicar = async (id: string, cambios: CambiosUsuario, porDefecto: string) => {
     try {
       await guardar.mutateAsync({ id, cambios })
       return true
@@ -205,6 +209,8 @@ export function useMutacionesUsuarios(): MutacionesUsuarios {
   return {
     cambiarRol: (id, rol) => aplicar(id, { rol }, "No se pudo cambiar el rol."),
     cambiarActivo: (id, activo) => aplicar(id, { activo }, "No se pudo cambiar el estado del usuario."),
+    cambiarNombre: (id, nombre) => aplicar(id, { nombre }, "No se pudo cambiar el nombre."),
+    cambiarEmail: (id, email) => aplicar(id, { email }, "No se pudo cambiar el correo."),
     guardando: guardar.isPending,
   }
 }
