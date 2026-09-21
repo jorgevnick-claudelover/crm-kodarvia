@@ -18,6 +18,7 @@ import {
   validarOportunidad,
 } from "@/lib/reglas"
 import { idUsuarioActual } from "@/lib/sesion"
+import { monedaActual } from "@/lib/utils/moneda"
 import type {
   EstadoOportunidad,
   HistorialEtapa,
@@ -307,7 +308,7 @@ export async function crear(datos: OportunidadInsert): Promise<Oportunidad> {
           contacto_id: datos.contacto_id,
           titulo: datos.titulo.trim(),
           importe: datos.importe ?? 0,
-          moneda: datos.moneda ?? "PEN",
+          moneda: datos.moneda ?? monedaActual(),
           etapa_id: datos.etapa_id,
           estado: datos.estado ?? "abierta",
           posicion: datos.posicion ?? posicionPorDefecto(),

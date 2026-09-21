@@ -3,6 +3,7 @@
  * Todos la leen; solo el administrador la cambia (antes RLS, ahora `exigirAdmin`).
  */
 import { escribir, leer } from "@/lib/almacen"
+import { fijarMoneda } from "@/lib/utils/moneda"
 import { exigirAdmin } from "@/lib/reglas"
 import { usuarioActual } from "@/lib/sesion"
 import type { ClaveConfiguracion, Json, ValoresConfiguracion } from "@/lib/types"
@@ -29,10 +30,14 @@ function valorDe<K extends ClaveConfiguracion>(clave: K, valor: unknown): Valore
   return String(valor) as ValoresConfiguracion[K]
 }
 
-/** Devuelve todas las claves conocidas, con valores por defecto si faltan. */
-export async function obtenerTodo(): Promise<ValoresConfiguracion> {
+/**
+ * Lee la configuración del almacén sin promesas y deja fijada la moneda activa.
+ * Es el único sitio donde se aplica: así no hay dos fuentes de verdad ni carrera entre
+ * la primera pintada y la lectura (el almacén es localStorage, se lee al instante).
+ */
+export function obtenerTodoSync(): ValoresConfiguracion {
   const guardada = leer().configuracion
-  return {
+  const valores: ValoresConfiguracion = {
     timezone: valorDe("timezone", guardada.timezone),
     moneda: valorDe("moneda", guardada.moneda),
     hora_recordatorio: valorDe("hora_recordatorio", guardada.hora_recordatorio),
@@ -41,6 +46,21 @@ export async function obtenerTodo(): Promise<ValoresConfiguracion> {
     titulo_oportunidad_default: valorDe("titulo_oportunidad_default", guardada.titulo_oportunidad_default),
     url_app: valorDe("url_app", guardada.url_app),
   }
+  fijarMoneda(valores.moneda)
+  return valores
+}
+
+/** Devuelve todas las claves conocidas, con valores por defecto si faltan. */
+export async function obtenerTodo(): Promise<ValoresConfiguracion> {
+  return obtenerTodoSync()
+}
+
+/**
+ * Deja fijada la moneda guardada antes de la primera pintada (la llama `main.tsx`).
+ * Sin esto se vería un instante el símbolo por defecto y luego el bueno.
+ */
+export function aplicarMonedaGuardada(): void {
+  obtenerTodoSync()
 }
 
 /** Guarda una clave. Solo administrador. */
@@ -56,4 +76,5 @@ export async function guardarVarias(valores: Partial<ValoresConfiguracion>): Pro
   escribir((db) => {
     for (const clave of claves) db.configuracion[clave] = valores[clave] as Json
   })
+  if (valores.moneda !== undefined) fijarMoneda(valores.moneda)
 }

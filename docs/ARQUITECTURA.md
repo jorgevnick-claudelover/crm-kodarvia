@@ -33,7 +33,7 @@ Fuera de alcance: integraciones, automatizaciones de marketing, facturación, do
 - Hosting: GitHub Pages, bajo `/crm-kodarvia/` (`base` en `vite.config.ts`, `basename` en el router y `dist/404.html` copiado de `index.html` para que recargar una ruta funcione). Workflow en `.github/workflows/pages.yml`.
 - Pruebas: vitest para las utilidades puras (teléfono, CSV, mapeo de importación, cálculo de embudo), para las reglas de negocio (`reglas.test.ts`), para el almacén (`almacen.test.ts`) y para la capa de datos sobre él (`datosLocales.test.ts`).
 
-Idioma de la interfaz: español de Perú. Vocabulario: "celular" (no móvil), "computadora", "independiente" (no autónomo), "estudio contable", "oportunidad", "etapa", "responsable" (persona asignada), "administrador" (jefe que ve y edita todo). Moneda: soles, símbolo `S/`, dos decimales, separador de miles con coma (`S/ 1,250.00`). Zona horaria fija `America/Lima` leída de configuración, nunca del navegador.
+Idioma de la interfaz: español de Perú. Vocabulario: "celular" (no móvil), "computadora", "independiente" (no autónomo), "estudio contable", "oportunidad", "etapa", "responsable" (persona asignada), "administrador" (jefe que ve y edita todo). Moneda: por defecto soles, símbolo `S/`, dos decimales, separador de miles con coma (`S/ 1,250.00`); desde el 21/09/2026 el símbolo se elige en Configuración → Valores y los `S/` que aparecen más abajo en este documento son el caso por defecto, no una constante (ver `docs/DECISIONES.md`). Zona horaria fija `America/Lima` leída de configuración, nunca del navegador.
 
 ## 3. Estructura de carpetas
 

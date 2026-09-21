@@ -5,6 +5,7 @@
 import { useMemo, type ReactNode } from "react"
 import { AlertTriangle, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useSimboloMoneda } from "@/hooks/useMoneda"
 import { cn } from "@/lib/utils"
 import {
   type CampoDestino,
@@ -12,7 +13,7 @@ import {
   type TipoCatalogo,
   type ValorCatalogo,
   CAMPOS_DESTINO,
-  ETIQUETA_CAMPO,
+  etiquetaCampo,
   textoCelda,
 } from "./mapeo"
 import type { Importacion4Pasos } from "./useImportacion"
@@ -131,6 +132,8 @@ function BloqueEquivalencias({ titulo, ayuda, tipo, valores, opciones, estado, e
 
 export function PasoMapeo({ estado }: { estado: Importacion4Pasos }) {
   const hoja = estado.hoja
+  // La etiqueta del importe lleva el símbolo de la moneda elegida.
+  const simbolo = useSimboloMoneda()
 
   /** Primer valor no vacío de cada columna, como ejemplo debajo del selector. */
   const ejemplos = useMemo(() => {
@@ -172,7 +175,7 @@ export function PasoMapeo({ estado }: { estado: Importacion4Pasos }) {
           <p className="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900" role="alert">
             <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
             <span>
-              Hay más de una columna con el mismo destino: {estado.repetidos.map((c) => ETIQUETA_CAMPO[c]).join(", ")}. Se usará la
+              Hay más de una columna con el mismo destino: {estado.repetidos.map((c) => etiquetaCampo(c, simbolo)).join(", ")}. Se usará la
               última.
             </span>
           </p>
@@ -194,7 +197,7 @@ export function PasoMapeo({ estado }: { estado: Importacion4Pasos }) {
               >
                 {CAMPOS_DESTINO.map((campo) => (
                   <option key={campo} value={campo}>
-                    {ETIQUETA_CAMPO[campo]}
+                    {etiquetaCampo(campo, simbolo)}
                   </option>
                 ))}
               </Selector>

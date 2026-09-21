@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ChipsSeleccion } from "@/components/comunes/ChipsSeleccion"
 import { Vacio } from "@/components/comunes/Vacio"
+import { useSimboloMoneda } from "@/hooks/useMoneda"
 import { formatearImporte, formatearNumero } from "@/lib/utils/moneda"
 import type { MatrizEtapaResponsable } from "./calculos"
 
@@ -34,6 +35,7 @@ interface TooltipEtapaProps {
 }
 
 function TooltipEtapa({ active, label, payload, matriz }: TooltipEtapaProps) {
+  const simbolo = useSimboloMoneda()
   if (!active || !payload || payload.length === 0) return null
   const fila = matriz.filas.find((f) => f.etapa === label)
   if (!fila) return null
@@ -50,21 +52,22 @@ function TooltipEtapa({ active, label, payload, matriz }: TooltipEtapaProps) {
               <span className="inline-block size-2.5 rounded-sm" style={{ background: p.color }} aria-hidden />
               <span className="flex-1">{p.name}</span>
               <span>{celda.n}</span>
-              <span className="text-muted-foreground">{formatearImporte(celda.suma)}</span>
+              <span className="text-muted-foreground">{formatearImporte(celda.suma, simbolo)}</span>
             </li>
           )
         })}
       </ul>
       <p className="mt-1 border-t pt-1 text-xs text-muted-foreground tabular-nums">
-        Total {fila.total.n} · {formatearImporte(fila.total.suma)}
+        Total {fila.total.n} · {formatearImporte(fila.total.suma, simbolo)}
       </p>
     </div>
   )
 }
 
-/** Barras apiladas: oportunidades abiertas por etapa (una barra) y responsable (segmentos). Conmutador n / S/. */
+/** Barras apiladas: oportunidades abiertas por etapa (una barra) y responsable (segmentos). Conmutador cantidad / dinero. */
 export function GraficoPorEtapa({ matriz }: GraficoPorEtapaProps) {
   const [medida, setMedida] = useState<Medida>("n")
+  const simbolo = useSimboloMoneda()
   const datos = useMemo<FilaGrafico[]>(
     () =>
       matriz.filas.map((f) => {
@@ -84,7 +87,7 @@ export function GraficoPorEtapa({ matriz }: GraficoPorEtapaProps) {
           tamano="sm"
           opciones={[
             { valor: "n", etiqueta: "Cantidad" },
-            { valor: "suma", etiqueta: "S/" },
+            { valor: "suma", etiqueta: simbolo },
           ]}
           valor={medida}
           onCambiar={(v) => v && setMedida(v)}
@@ -149,12 +152,12 @@ export function GraficoPorEtapa({ matriz }: GraficoPorEtapaProps) {
                           const c = f.celdas[s.id]
                           return (
                             <TableCell key={s.id} className="text-right tabular-nums">
-                              {c ? `${c.n} · ${formatearImporte(c.suma)}` : "–"}
+                              {c ? `${c.n} · ${formatearImporte(c.suma, simbolo)}` : "–"}
                             </TableCell>
                           )
                         })}
                         <TableCell className="text-right font-medium tabular-nums">
-                          {f.total.n} · {formatearImporte(f.total.suma)}
+                          {f.total.n} · {formatearImporte(f.total.suma, simbolo)}
                         </TableCell>
                       </TableRow>
                     ))}

@@ -159,8 +159,8 @@ export const SECCIONES: SeccionAyuda[] = [
     texto:
       "Resume el estado del estudio en cinco números, con gráficos debajo. Arriba se elige el Periodo y el Responsable, y todo lo demás se recalcula.",
     definiciones: [
-      { termino: "Abiertas", texto: "Cuántas oportunidades siguen vivas y cuánto suman en S/." },
-      { termino: "Ganado este mes", texto: "Cuánto se cerró a favor este mes, en S/." },
+      { termino: "Abiertas", texto: "Cuántas oportunidades siguen vivas y cuánto suman en la moneda del estudio." },
+      { termino: "Ganado este mes", texto: "Cuánto se cerró a favor este mes, en la moneda del estudio." },
       { termino: "Perdidas este mes", texto: "Cuántas oportunidades se dieron por perdidas este mes." },
       { termino: "Tareas vencidas", texto: "Tareas pendientes cuya hora ya pasó." },
       { termino: "Sin seguimiento", texto: "Contactos que no tienen ninguna tarea pendiente." },
@@ -190,7 +190,7 @@ export const SECCIONES: SeccionAyuda[] = [
     pasos: [
       "Deje puestos los filtros que le interesan.",
       "Toque Exportar: entre paréntesis le dice cuántas filas salieron.",
-      "Se descarga un archivo CSV que Excel abre con las tildes y los soles bien puestos.",
+      "Se descarga un archivo CSV que Excel abre con las tildes y los importes bien puestos.",
     ],
   },
   {

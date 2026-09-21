@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { Link } from "react-router-dom"
 import { AlertTriangle, Briefcase, Trophy, UserX, XCircle } from "lucide-react"
 import { Card } from "@/components/ui/card"
+import { useSimboloMoneda } from "@/hooks/useMoneda"
 import { formatearImporte } from "@/lib/utils/moneda"
 import { cn } from "@/lib/utils"
 import type { Resumen } from "./calculos"
@@ -13,6 +14,7 @@ export interface TarjetasResumenProps {
 
 /** Cinco tarjetas: 2 columnas en celular, 5 en computadora. */
 export function TarjetasResumen({ resumen, responsableId }: TarjetasResumenProps) {
+  const simbolo = useSimboloMoneda()
   const sufijoResponsable = responsableId ? `&responsableId=${encodeURIComponent(responsableId)}` : ""
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
@@ -20,13 +22,13 @@ export function TarjetasResumen({ resumen, responsableId }: TarjetasResumenProps
         titulo="Abiertas"
         icono={<Briefcase className="size-4" aria-hidden />}
         valor={String(resumen.abiertas.n)}
-        detalle={formatearImporte(resumen.abiertas.suma)}
+        detalle={formatearImporte(resumen.abiertas.suma, simbolo)}
         a={`/oportunidades?estado=abierta${sufijoResponsable}`}
       />
       <Tarjeta
         titulo="Ganado este mes"
         icono={<Trophy className="size-4 text-emerald-600" aria-hidden />}
-        valor={formatearImporte(resumen.ganadoEsteMes.suma)}
+        valor={formatearImporte(resumen.ganadoEsteMes.suma, simbolo)}
         detalle={`${resumen.ganadoEsteMes.n} ${resumen.ganadoEsteMes.n === 1 ? "oportunidad" : "oportunidades"}`}
         compacto
         a={`/oportunidades?estado=ganada${sufijoResponsable}`}

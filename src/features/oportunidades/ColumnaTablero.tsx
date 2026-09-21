@@ -75,7 +75,7 @@ export interface ColumnaTableroProps {
   className?: string
 }
 
-/** Columna del tablero: cabecera con contador y suma S/, tarjetas ordenables, zona de soltar. */
+/** Columna del tablero: cabecera con contador y suma de importes, tarjetas ordenables, zona de soltar. */
 export function ColumnaTablero({
   etapa,
   oportunidades,

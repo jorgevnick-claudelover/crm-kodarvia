@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group"
 import { PanelFormulario } from "@/components/comunes/PanelFormulario"
+import { useSimboloMoneda } from "@/hooks/useMoneda"
 import type { Oportunidad } from "@/lib/types"
 import { formatearImporte, parsearImporte } from "@/lib/utils/moneda"
 import { useGanarOportunidad } from "./useOportunidades"
@@ -19,6 +20,7 @@ export interface ModalGanarProps {
 /** Marcar como ganada: importe editable (prefijado con el actual) y Confirmar. */
 export function ModalGanar({ abierto, onCerrar, oportunidad, onGanada }: ModalGanarProps) {
   const ganar = useGanarOportunidad()
+  const simbolo = useSimboloMoneda()
   const [importeTexto, setImporteTexto] = useState("")
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export function ModalGanar({ abierto, onCerrar, oportunidad, onGanada }: ModalGa
       { id: oportunidad.id, importe },
       {
         onSuccess: (guardada) => {
-          toast.success(`Ganada por ${formatearImporte(importe)}.`)
+          toast.success(`Ganada por ${formatearImporte(importe, simbolo)}.`)
           if (onGanada) onGanada(guardada)
           else onCerrar()
         },
@@ -82,7 +84,7 @@ export function ModalGanar({ abierto, onCerrar, oportunidad, onGanada }: ModalGa
         </Label>
         <InputGroup className="h-12">
           <InputGroupAddon>
-            <InputGroupText className="text-base font-semibold">S/</InputGroupText>
+            <InputGroupText className="text-base font-semibold">{simbolo}</InputGroupText>
           </InputGroupAddon>
           <InputGroupInput
             id="importe-ganada"
@@ -96,7 +98,7 @@ export function ModalGanar({ abierto, onCerrar, oportunidad, onGanada }: ModalGa
             placeholder="0.00"
           />
         </InputGroup>
-        <p className="text-sm text-muted-foreground">Se guardará {formatearImporte(importe)} como importe ganado.</p>
+        <p className="text-sm text-muted-foreground">Se guardará {formatearImporte(importe, simbolo)} como importe ganado.</p>
       </form>
     </PanelFormulario>
   )

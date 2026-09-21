@@ -47,6 +47,7 @@ describe("mensajeEtapaConAbiertas", () => {
 describe("validarValores", () => {
   const base = {
     nombre_empresa: "Estudio Quispe",
+    moneda: "PEN",
     hora_recordatorio: "09:00",
     importe_default: "150.50",
     titulo_oportunidad_default: "Facturación electrónica",
@@ -56,6 +57,13 @@ describe("validarValores", () => {
   it("acepta valores correctos", () => {
     expect(validarValores(base)).toBeNull()
     expect(validarValores({ ...base, url_app: "" })).toBeNull()
+  })
+
+  it("acepta cualquier moneda de la lista y rechaza las de fuera", () => {
+    expect(validarValores({ ...base, moneda: "USD" })).toBeNull()
+    expect(validarValores({ ...base, moneda: "BOB" })).toBeNull()
+    expect(validarValores({ ...base, moneda: "" })).toContain("moneda")
+    expect(validarValores({ ...base, moneda: "XYZ" })).toContain("moneda")
   })
 
   it("exige nombre de empresa", () => {

@@ -14,6 +14,7 @@ import { registrarContactoReciente } from "@/components/comunes/SelectorContacto
 import { useCatalogos } from "@/hooks/useCatalogos"
 import { useConfiguracion } from "@/hooks/useConfiguracion"
 import { useDebounce } from "@/hooks/useDebounce"
+import { useSimboloMoneda } from "@/hooks/useMoneda"
 import { useUsuarioActual } from "@/hooks/useUsuarioActual"
 import * as apiContactos from "@/lib/api/contactos"
 import type { Contacto, ContactoInsert, ContactoUpdate, DocTipo } from "@/lib/types"
@@ -114,6 +115,7 @@ export function FormularioContacto({ abierto, onCerrar, contacto, onGuardado, no
   const { uid, esAdmin, usuario } = useUsuarioActual()
   const { origenes, etapas, usuarios, origenPorId } = useCatalogos()
   const { configuracion } = useConfiguracion()
+  const simbolo = useSimboloMoneda()
   const crear = useCrearContacto()
   const actualizar = useActualizarContacto()
   const crearOportunidad = useCrearOportunidadContacto()
@@ -467,7 +469,7 @@ export function FormularioContacto({ abierto, onCerrar, contacto, onGuardado, no
                 <div className="space-y-1.5">
                   <Label htmlFor="oportunidad-importe">Importe</Label>
                   <div className="relative">
-                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-base text-muted-foreground">S/</span>
+                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-base text-muted-foreground">{simbolo}</span>
                     <Input
                       id="oportunidad-importe"
                       inputMode="decimal"

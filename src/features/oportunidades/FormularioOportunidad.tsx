@@ -11,6 +11,7 @@ import { PanelFormulario } from "@/components/comunes/PanelFormulario"
 import { SelectorContacto } from "@/components/comunes/SelectorContacto"
 import { useCatalogos } from "@/hooks/useCatalogos"
 import { useConfiguracion } from "@/hooks/useConfiguracion"
+import { useSimboloMoneda } from "@/hooks/useMoneda"
 import { useUsuarioActual } from "@/hooks/useUsuarioActual"
 import * as apiContactos from "@/lib/api/contactos"
 import type { Contacto, Oportunidad, OportunidadInsert, OportunidadUpdate } from "@/lib/types"
@@ -36,6 +37,7 @@ export interface FormularioOportunidadProps {
 export function FormularioOportunidad({ abierto, onCerrar, contactoId, oportunidad, onGuardado }: FormularioOportunidadProps) {
   const { etapas, usuarios } = useCatalogos()
   const { configuracion } = useConfiguracion()
+  const simbolo = useSimboloMoneda()
   const { uid, esAdmin } = useUsuarioActual()
   const crear = useCrearOportunidad()
   const actualizar = useActualizarOportunidad()
@@ -213,7 +215,7 @@ export function FormularioOportunidad({ abierto, onCerrar, contactoId, oportunid
           </Label>
           <InputGroup className="h-12">
             <InputGroupAddon>
-              <InputGroupText className="text-base font-semibold">S/</InputGroupText>
+              <InputGroupText className="text-base font-semibold">{simbolo}</InputGroupText>
             </InputGroupAddon>
             <InputGroupInput
               id="op-importe"

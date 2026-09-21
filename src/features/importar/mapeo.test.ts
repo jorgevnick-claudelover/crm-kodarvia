@@ -210,6 +210,15 @@ describe("importes", () => {
     expect(parsearImporteHoja("1.250,50")).toBe(1250.5)
     expect(parsearImporteHoja("S/")).toBeNull()
   })
+
+  it("acepta el símbolo de cualquier moneda de la hoja del cliente", () => {
+    // Parseo de entrada: la hoja puede venir en soles, dólares, euros o bolivianos.
+    expect(parsearImporteHoja("$ 1,250.50")).toBe(1250.5)
+    expect(parsearImporteHoja("€ 320,00")).toBe(320)
+    expect(parsearImporteHoja("Bs 150")).toBe(150)
+    expect(parsearImporteHoja("USD 1,200")).toBe(1200)
+    expect(parsearImporteHoja("$")).toBeNull()
+  })
 })
 
 describe("fechas", () => {

@@ -6,12 +6,13 @@ import { BotonExportar } from "@/components/comunes/BotonExportar"
 import { useCatalogos } from "@/hooks/useCatalogos"
 import { useEsMovil } from "@/hooks/useEsMovil"
 import { useFiltrosURL } from "@/hooks/useFiltrosURL"
+import { useSimboloMoneda } from "@/hooks/useMoneda"
 import * as apiOportunidades from "@/lib/api/oportunidades"
 import { FILTROS_OPORTUNIDADES_DEFAULT, type FiltrosOportunidades as Filtros } from "@/lib/api/oportunidades"
 import { FiltrosOportunidades, type FiltrosURLOportunidades } from "./FiltrosOportunidades"
 import { FormularioOportunidad } from "./FormularioOportunidad"
 import { ListaPorEtapa } from "./ListaPorEtapa"
-import { COLUMNAS_EXPORTACION, filaExportacion } from "./logica"
+import { columnasExportacion, filaExportacion } from "./logica"
 import { Tablero } from "./Tablero"
 
 /**
@@ -24,6 +25,9 @@ export function PaginaOportunidades() {
   const { etapas, origenPorId } = useCatalogos()
   const { filtros, setFiltros, limpiar } = useFiltrosURL<FiltrosURLOportunidades>(FILTROS_OPORTUNIDADES_DEFAULT)
   const [nuevaAbierta, setNuevaAbierta] = useState(false)
+  // La cabecera del importe lleva el símbolo de la moneda activa; se rehace si cambia.
+  const simbolo = useSimboloMoneda()
+  const columnas = useMemo(() => columnasExportacion(simbolo), [simbolo])
 
   const estadoCerrado = filtros.estado === "ganada" || filtros.estado === "perdida"
   const verLista = esMovil || estadoCerrado
@@ -47,7 +51,7 @@ export function PaginaOportunidades() {
         <FiltrosOportunidades filtros={filtros} setFiltros={setFiltros} limpiar={limpiar} className="min-w-0 flex-1" />
         {!esMovil && (
           <>
-            <BotonExportar obtenerFilas={obtenerFilas} columnas={COLUMNAS_EXPORTACION} nombreBase="oportunidades" filtros={{ ...filtrosEfectivos }} size="lg" />
+            <BotonExportar obtenerFilas={obtenerFilas} columnas={columnas} nombreBase="oportunidades" filtros={{ ...filtrosEfectivos }} size="lg" />
             <Button type="button" size="lg" className="min-h-11 gap-1.5" onClick={() => setNuevaAbierta(true)}>
               <Plus />
               Nueva oportunidad
@@ -64,7 +68,7 @@ export function PaginaOportunidades() {
             <Plus />
             Nueva oportunidad
           </Button>
-          <BotonExportar obtenerFilas={obtenerFilas} columnas={COLUMNAS_EXPORTACION} nombreBase="oportunidades" filtros={{ ...filtrosEfectivos }} size="lg" />
+          <BotonExportar obtenerFilas={obtenerFilas} columnas={columnas} nombreBase="oportunidades" filtros={{ ...filtrosEfectivos }} size="lg" />
         </div>
       )}
 

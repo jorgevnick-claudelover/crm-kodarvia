@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Cargando } from "@/components/comunes/Cargando"
 import { useEsMovil } from "@/hooks/useEsMovil"
 import { cn } from "@/lib/utils"
+import { useSimboloMoneda } from "@/hooks/useMoneda"
 import { formatearImporte } from "@/lib/utils/moneda"
 import { formatearTelefono } from "@/lib/utils/telefono"
 import { type PlanFila, describirResultado } from "./mapeo"
@@ -61,6 +62,7 @@ function Resultado({ p }: { p: PlanFila }) {
 
 export function PasoPrevisualizacion({ estado }: { estado: Importacion4Pasos }) {
   const esMovil = useEsMovil()
+  const simbolo = useSimboloMoneda()
   const [todas, setTodas] = useState(false)
   const plan = estado.plan
 
@@ -108,7 +110,7 @@ export function PasoPrevisualizacion({ estado }: { estado: Importacion4Pasos }) 
               </p>
               {p.oportunidad && (
                 <p className="text-sm text-muted-foreground">
-                  {p.datos.etapa ?? "Primera etapa"} · {formatearImporte(p.oportunidad.importe)}
+                  {p.datos.etapa ?? "Primera etapa"} · {formatearImporte(p.oportunidad.importe, simbolo)}
                 </p>
               )}
               <p className="pt-1 text-sm">
@@ -142,7 +144,7 @@ export function PasoPrevisualizacion({ estado }: { estado: Importacion4Pasos }) 
                   <td className="px-3 py-2 text-muted-foreground">{p.datos.email ?? ""}</td>
                   <td className="px-3 py-2 text-muted-foreground">{p.datos.etapa ?? ""}</td>
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
-                    {p.oportunidad ? formatearImporte(p.oportunidad.importe) : ""}
+                    {p.oportunidad ? formatearImporte(p.oportunidad.importe, simbolo) : ""}
                   </td>
                   <td className="px-3 py-2">
                     <Resultado p={p} />

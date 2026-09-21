@@ -81,7 +81,7 @@ src/
     types.ts               tipos de todas las tablas y enums
     api/                   todo el acceso a datos (contactos, oportunidades, tareas, actividades,
                            catalogos, usuarios, buscar, importaciones, configuracion, comun)
-    utils/                 cn, fechas (America/Lima), telefono (+51), moneda (S/), csv, texto
+    utils/                 cn, fechas (America/Lima), telefono (+51), moneda (símbolo configurable, S/ por defecto), csv, texto
   hooks/                   useSesion, useUsuarioActual, useRealtime, useEsMovil, useFiltrosURL,
                            useCatalogos, useConfiguracion, useDebounce
   components/

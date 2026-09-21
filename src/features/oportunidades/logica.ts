@@ -5,7 +5,7 @@
 import type { Etapa, EstadoOportunidad, OportunidadConRelaciones } from "@/lib/types"
 import type { ColumnaCSV } from "@/lib/utils/csv"
 import { diasEntre, formatearFecha, formatearFechaHora } from "@/lib/utils/fechas"
-import { importeParaCSV } from "@/lib/utils/moneda"
+import { importeParaCSV, simboloActual } from "@/lib/utils/moneda"
 import { ETIQUETA_ESTADO_OPORTUNIDAD } from "@/lib/types"
 
 /** Lo mínimo que hace falta de una tarjeta para calcular posiciones. */
@@ -134,19 +134,27 @@ export const COLOR_ESTADO: Record<EstadoOportunidad, string> = {
 
 // ---------- Exportación (criterio 7) ----------
 
-export const COLUMNAS_EXPORTACION: ColumnaCSV[] = [
-  { clave: "contacto", titulo: "Contacto" },
-  { clave: "titulo", titulo: "Título" },
-  { clave: "etapa", titulo: "Etapa" },
-  { clave: "estado", titulo: "Estado" },
-  { clave: "importe", titulo: "Importe (S/)" },
-  { clave: "responsable", titulo: "Responsable" },
-  { clave: "origen", titulo: "Origen del contacto" },
-  { clave: "motivo_perdida", titulo: "Motivo de pérdida" },
-  { clave: "fecha_prevista", titulo: "Fecha prevista" },
-  { clave: "creada", titulo: "Creada" },
-  { clave: "cerrada", titulo: "Ganada/Perdida" },
-]
+/**
+ * Columnas del CSV. Es una función porque la cabecera del importe lleva el símbolo de
+ * la moneda elegida; el valor va siempre sin símbolo y con punto decimal. Quien la
+ * llama desde la interfaz pasa el símbolo que ya tiene suscrito, para que la cabecera
+ * se rehaga al cambiar de moneda.
+ */
+export function columnasExportacion(simbolo: string = simboloActual()): ColumnaCSV[] {
+  return [
+    { clave: "contacto", titulo: "Contacto" },
+    { clave: "titulo", titulo: "Título" },
+    { clave: "etapa", titulo: "Etapa" },
+    { clave: "estado", titulo: "Estado" },
+    { clave: "importe", titulo: `Importe (${simbolo})` },
+    { clave: "responsable", titulo: "Responsable" },
+    { clave: "origen", titulo: "Origen del contacto" },
+    { clave: "motivo_perdida", titulo: "Motivo de pérdida" },
+    { clave: "fecha_prevista", titulo: "Fecha prevista" },
+    { clave: "creada", titulo: "Creada" },
+    { clave: "cerrada", titulo: "Ganada/Perdida" },
+  ]
+}
 
 export interface CatalogoNombres {
   origenPorId: (id: string | null | undefined) => { nombre: string } | undefined

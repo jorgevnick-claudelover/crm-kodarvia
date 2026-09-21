@@ -172,16 +172,17 @@ describe("PestanaUsuarios", () => {
 })
 
 describe("PestanaValores", () => {
-  it("trae los valores guardados y la moneda fija en soles", async () => {
+  it("trae los valores guardados y deja elegir la moneda", async () => {
     await renderizar(<PestanaValores />)
     const empresa = contenedor.querySelector<HTMLInputElement>("#cfg-empresa")
     const hora = contenedor.querySelector<HTMLInputElement>("#cfg-hora")
     const url = contenedor.querySelector<HTMLInputElement>("#cfg-url")
-    const moneda = contenedor.querySelector<HTMLInputElement>("#cfg-moneda")
+    const moneda = contenedor.querySelector<HTMLButtonElement>("#cfg-moneda")
     expect(empresa?.value).toBe("Estudio Quispe")
     expect(hora?.value).toBe("09:00")
     expect(url?.value).toBe("https://crm.estudio.pe")
-    expect(moneda?.value).toContain("PEN")
-    expect(moneda?.disabled).toBe(true)
+    expect(moneda?.textContent).toContain("PEN")
+    expect(moneda?.textContent).toContain("soles")
+    expect(moneda?.disabled).toBe(false)
   })
 })

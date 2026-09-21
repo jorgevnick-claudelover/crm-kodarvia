@@ -8,6 +8,7 @@ import { ChipsSeleccion } from "@/components/comunes/ChipsSeleccion"
 import { PanelFormulario } from "@/components/comunes/PanelFormulario"
 import { useCatalogos } from "@/hooks/useCatalogos"
 import { useConfiguracion } from "@/hooks/useConfiguracion"
+import { useSimboloMoneda } from "@/hooks/useMoneda"
 import { useUsuarioActual } from "@/hooks/useUsuarioActual"
 import type { Contacto, Oportunidad } from "@/lib/types"
 import { parsearImporte } from "@/lib/utils/moneda"
@@ -29,6 +30,7 @@ export function MiniFormularioOportunidad({ abierto, onCerrar, contacto, onGuard
   const { esAdmin } = useUsuarioActual()
   const { etapas } = useCatalogos()
   const { configuracion } = useConfiguracion()
+  const simbolo = useSimboloMoneda()
   const crear = useCrearOportunidadContacto()
   const [titulo, setTitulo] = useState<string | null>(null)
   const [importe, setImporte] = useState<string | null>(null)
@@ -114,7 +116,7 @@ export function MiniFormularioOportunidad({ abierto, onCerrar, contacto, onGuard
         <div className="space-y-1.5">
           <Label htmlFor="mini-op-importe">Importe</Label>
           <div className="relative">
-            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-base text-muted-foreground">S/</span>
+            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-base text-muted-foreground">{simbolo}</span>
             <Input
               id="mini-op-importe"
               inputMode="decimal"

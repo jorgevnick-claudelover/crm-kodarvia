@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Vacio } from "@/components/comunes/Vacio"
+import { useSimboloMoneda } from "@/hooks/useMoneda"
 import { formatearImporte } from "@/lib/utils/moneda"
 import type { FilaMotivo } from "./calculos"
 
@@ -10,6 +11,7 @@ export interface TablaPerdidasPorMotivoProps {
 
 /** Perdidas del rango agrupadas por motivo, ordenadas por cantidad. */
 export function TablaPerdidasPorMotivo({ filas }: TablaPerdidasPorMotivoProps) {
+  const simbolo = useSimboloMoneda()
   const totalN = filas.reduce((s, f) => s + f.n, 0)
   const totalSuma = filas.reduce((s, f) => s + f.suma, 0)
   return (
@@ -17,7 +19,7 @@ export function TablaPerdidasPorMotivo({ filas }: TablaPerdidasPorMotivoProps) {
       <CardHeader>
         <CardTitle>Perdidas por motivo</CardTitle>
         <CardDescription className="tabular-nums">
-          {totalN} {totalN === 1 ? "perdida" : "perdidas"} en el periodo · {formatearImporte(totalSuma)}
+          {totalN} {totalN === 1 ? "perdida" : "perdidas"} en el periodo · {formatearImporte(totalSuma, simbolo)}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -40,7 +42,7 @@ export function TablaPerdidasPorMotivo({ filas }: TablaPerdidasPorMotivoProps) {
                     <TableCell className="font-medium">{f.motivo}</TableCell>
                     <TableCell className="text-right tabular-nums">{f.n}</TableCell>
                     <TableCell className="text-right text-muted-foreground tabular-nums">{totalN > 0 ? Math.round((f.n / totalN) * 100) : 0}%</TableCell>
-                    <TableCell className="text-right tabular-nums">{formatearImporte(f.suma)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{formatearImporte(f.suma, simbolo)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

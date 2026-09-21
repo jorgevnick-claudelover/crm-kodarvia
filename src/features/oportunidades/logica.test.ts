@@ -1,7 +1,9 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 import type { Etapa } from "@/lib/types"
+import { MONEDA_DEFAULT, fijarMoneda } from "@/lib/utils/moneda"
 import {
   agruparPorEtapa,
+  columnasExportacion,
   calcularPosicionDestino,
   ordenarTarjetas,
   posicionAlFinal,
@@ -131,5 +133,35 @@ describe("otras reglas", () => {
     expect(validarPerdida("")).toEqual({ ok: false, error: "Elige un motivo de pérdida." })
     expect(validarPerdida(null).ok).toBe(false)
     expect(validarPerdida("motivo-1").ok).toBe(true)
+  })
+})
+
+describe("columnas de exportación", () => {
+  afterEach(() => {
+    fijarMoneda(MONEDA_DEFAULT)
+  })
+  it("la cabecera del importe lleva el símbolo de la moneda activa", () => {
+    const titulo = () => columnasExportacion().find((c) => c.clave === "importe")?.titulo
+    expect(titulo()).toBe("Importe (S/)")
+    fijarMoneda("USD")
+    expect(titulo()).toBe("Importe ($)")
+    fijarMoneda("BOB")
+    expect(titulo()).toBe("Importe (Bs)")
+  })
+  it("las demás columnas no dependen de la moneda", () => {
+    fijarMoneda("EUR")
+    expect(columnasExportacion().map((c) => c.clave)).toEqual([
+      "contacto",
+      "titulo",
+      "etapa",
+      "estado",
+      "importe",
+      "responsable",
+      "origen",
+      "motivo_perdida",
+      "fecha_prevista",
+      "creada",
+      "cerrada",
+    ])
   })
 })

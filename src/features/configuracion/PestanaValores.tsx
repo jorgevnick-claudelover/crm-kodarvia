@@ -1,6 +1,7 @@
 /**
- * Valores por defecto del estudio: nombre de la empresa, moneda (fija en soles),
- * hora del recordatorio, importe por defecto, título de oportunidad y URL de la app.
+ * Valores por defecto del estudio: nombre de la empresa, moneda, hora del recordatorio,
+ * importe por defecto, título de oportunidad y URL de la app. Al guardar la moneda, el
+ * símbolo cambia en toda la interfaz sin recargar.
  */
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -8,14 +9,20 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Cargando } from "@/components/comunes/Cargando"
 import { useConfiguracion } from "@/hooks/useConfiguracion"
 import { ZONA } from "@/lib/utils/fechas"
+import { MONEDAS, MONEDA_DEFAULT, etiquetaMoneda, simboloDe } from "@/lib/utils/moneda"
 import { importeDesdeTexto, validarValores, type ValoresFormulario } from "./logica"
 import { mensajeError } from "./useConfiguracionPagina"
 
+/** Lo que muestra el desplegable: { PEN: 'PEN — soles (S/)', … }. */
+const ETIQUETAS_MONEDA: Record<string, string> = Object.fromEntries(MONEDAS.map((m) => [m.codigo, etiquetaMoneda(m.codigo)]))
+
 const VACIO: ValoresFormulario = {
   nombre_empresa: "",
+  moneda: MONEDA_DEFAULT,
   hora_recordatorio: "09:00",
   importe_default: "0",
   titulo_oportunidad_default: "",
@@ -33,6 +40,7 @@ export function PestanaValores() {
     cargado.current = true
     setValores({
       nombre_empresa: configuracion.nombre_empresa,
+      moneda: configuracion.moneda,
       hora_recordatorio: configuracion.hora_recordatorio,
       importe_default: String(configuracion.importe_default ?? 0),
       titulo_oportunidad_default: configuracion.titulo_oportunidad_default,
@@ -51,7 +59,7 @@ export function PestanaValores() {
     try {
       await guardar({
         nombre_empresa: valores.nombre_empresa.trim(),
-        moneda: "PEN",
+        moneda: valores.moneda,
         hora_recordatorio: valores.hora_recordatorio,
         importe_default: importeDesdeTexto(valores.importe_default),
         titulo_oportunidad_default: valores.titulo_oportunidad_default.trim(),
@@ -97,8 +105,25 @@ export function PestanaValores() {
         <Label htmlFor="cfg-moneda" className="text-base">
           Moneda
         </Label>
-        <Input id="cfg-moneda" className="h-12 text-base" value="PEN — soles (S/)" readOnly disabled />
-        <p className="text-sm text-muted-foreground">El CRM trabaja solo en soles; no se puede cambiar.</p>
+        <Select
+          items={ETIQUETAS_MONEDA}
+          value={valores.moneda}
+          onValueChange={(valor: string | null) => {
+            if (valor) cambiar("moneda", valor)
+          }}
+        >
+          <SelectTrigger id="cfg-moneda" className="h-12 w-full max-w-80 text-base" aria-label="Moneda">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {MONEDAS.map((m) => (
+              <SelectItem key={m.codigo} value={m.codigo}>
+                {etiquetaMoneda(m.codigo)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-sm text-muted-foreground">El símbolo acompaña a todos los importes de la app. Los valores guardados no se convierten.</p>
       </div>
 
       <div className="space-y-1.5">
@@ -121,7 +146,7 @@ export function PestanaValores() {
         </Label>
         <InputGroup className="h-12 max-w-56">
           <InputGroupAddon>
-            <InputGroupText className="text-base font-semibold">S/</InputGroupText>
+            <InputGroupText className="text-base font-semibold">{simboloDe(valores.moneda)}</InputGroupText>
           </InputGroupAddon>
           <InputGroupInput
             id="cfg-importe"

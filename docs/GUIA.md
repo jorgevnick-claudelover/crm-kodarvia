@@ -85,8 +85,8 @@ Resume el estado del estudio en cinco números, con gráficos debajo. Arriba se 
 
 | Número | Qué significa |
 |---|---|
-| Abiertas | Cuántas oportunidades siguen vivas y cuánto suman en S/. |
-| Ganado este mes | Cuánto se cerró a favor este mes, en S/. |
+| Abiertas | Cuántas oportunidades siguen vivas y cuánto suman en la moneda del estudio. |
+| Ganado este mes | Cuánto se cerró a favor este mes, en la moneda del estudio. |
 | Perdidas este mes | Cuántas oportunidades se dieron por perdidas este mes. |
 | Tareas vencidas | Tareas pendientes cuya hora ya pasó. |
 | Sin seguimiento | Contactos que no tienen ninguna tarea pendiente. |
@@ -110,7 +110,7 @@ El botón **Exportar** (en el celular, **CSV**) está en Contactos, Oportunidade
 
 1. Deje puestos los filtros que le interesan.
 2. Toque **Exportar**: entre paréntesis le dice cuántas filas salieron.
-3. Se descarga un archivo CSV que Excel abre con las tildes y los soles bien puestos.
+3. Se descarga un archivo CSV que Excel abre con las tildes y los importes bien puestos.
 
 ## Quién puede editar qué
 

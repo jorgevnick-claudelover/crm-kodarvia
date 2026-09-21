@@ -8,6 +8,7 @@
  */
 import type { Contacto, ContactoUpdate, DocTipo, EstadoOportunidad, Json, ResultadoImportacion } from "@/lib/types"
 import { desdeLima } from "@/lib/utils/fechas"
+import { simboloActual } from "@/lib/utils/moneda"
 import { normalizarTelefonoPE } from "@/lib/utils/telefono"
 import { normalizarTexto, similitud } from "@/lib/utils/texto"
 
@@ -58,12 +59,20 @@ export const ETIQUETA_CAMPO: Record<CampoDestino, string> = {
   responsable: "Responsable (vendedor)",
   notas: "Notas",
   etapa: "Etapa",
-  importe: "Importe (S/)",
+  importe: "Importe",
   estado: "Estado (abierta, ganada, perdida)",
   titulo_oportunidad: "Título de la oportunidad",
   fecha: "Fecha de registro",
   extra: "Guardar como dato extra",
   ignorar: "Ignorar",
+}
+
+/**
+ * Etiqueta del campo. La del importe lleva el símbolo de la moneda elegida en Configuración;
+ * la pantalla pasa el que ya tiene suscrito para que se rehaga al cambiar de moneda.
+ */
+export function etiquetaCampo(campo: CampoDestino, simbolo: string = simboloActual()): string {
+  return campo === "importe" ? `${ETIQUETA_CAMPO.importe} (${simbolo})` : ETIQUETA_CAMPO[campo]
 }
 
 /** Campos que solo admiten una columna (extra e ignorar admiten varias). */
@@ -307,7 +316,8 @@ export function parsearFechaHoja(valor: Celda): string | null {
 }
 
 /**
- * Importe de la hoja a número: quita 'S/', espacios y símbolos; entiende
+ * Importe de la hoja a número: quita cualquier símbolo de moneda ('S/', '$', '€', 'Bs'),
+ * espacios y demás caracteres que no sean cifras; entiende
  * '1,200' (miles), '1,250.50', '1.250,50' y '350.5'. null si no hay número.
  */
 export function parsearImporteHoja(valor: Celda): number | null {

@@ -1,4 +1,5 @@
 /** Lógica pura de la configuración: orden de catálogos, duplicados y validación de valores. */
+import { monedaPorCodigo } from "@/lib/utils/moneda"
 import { normalizarTexto } from "@/lib/utils/texto"
 
 export interface ElementoCatalogo {
@@ -35,6 +36,8 @@ export function mensajeEtapaConAbiertas(n: number): string {
 
 export interface ValoresFormulario {
   nombre_empresa: string
+  /** Código de la moneda (PEN, USD…), de la lista de `utils/moneda`. */
+  moneda: string
   hora_recordatorio: string
   importe_default: string
   titulo_oportunidad_default: string
@@ -44,6 +47,7 @@ export interface ValoresFormulario {
 /** Devuelve el primer error de los valores o null si todo está bien. */
 export function validarValores(v: ValoresFormulario): string | null {
   if (!v.nombre_empresa.trim()) return "Escribe el nombre de la empresa."
+  if (!monedaPorCodigo(v.moneda)) return "Elige una moneda de la lista."
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(v.hora_recordatorio)) return "La hora del recordatorio debe tener el formato HH:MM (por ejemplo 09:00)."
   const importe = Number(String(v.importe_default).replace(/,/g, "").trim())
   if (!Number.isFinite(importe) || importe < 0) return "El importe por defecto debe ser un número mayor o igual que cero."

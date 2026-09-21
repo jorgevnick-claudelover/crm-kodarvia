@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest"
 import { leer, reiniciar } from "@/lib/almacen"
 import { ID_USUARIOS } from "@/lib/semilla"
 import { CLAVE_USUARIO, entrarComo } from "@/lib/sesion"
+import { MONEDA_DEFAULT, fijarMoneda } from "@/lib/utils/moneda"
 import * as contactos from "./contactos"
 import * as oportunidades from "./oportunidades"
 import * as tablero from "./oportunidadesTablero"
@@ -40,6 +41,20 @@ describe("contactos y oportunidades sobre el almacén local", () => {
     const reabierta = await oportunidades.reabrir(o.id)
     expect(reabierta.motivo_perdida_id).toBeNull()
     expect(reabierta.perdida_at).toBeNull()
+  })
+
+  it("la oportunidad nueva guarda la moneda elegida, no siempre soles", async () => {
+    const c = await contactos.crear({ nombre: "Bruno Vera" })
+    const etapa = leer().etapas[0]
+    const enSoles = await oportunidades.crear({ contacto_id: c.id, titulo: "En soles", etapa_id: etapa.id })
+    expect(enSoles.moneda).toBe("PEN")
+    fijarMoneda("USD")
+    try {
+      const enDolares = await oportunidades.crear({ contacto_id: c.id, titulo: "En dólares", etapa_id: etapa.id })
+      expect(enDolares.moneda).toBe("USD")
+    } finally {
+      fijarMoneda(MONEDA_DEFAULT)
+    }
   })
 
   it("mover escribe historial, rechaza etapa inactiva y respeta permiso", async () => {

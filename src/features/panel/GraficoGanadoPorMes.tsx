@@ -1,5 +1,6 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSimboloMoneda } from "@/hooks/useMoneda"
 import { formatearImporte, formatearNumero } from "@/lib/utils/moneda"
 import type { PuntoMes } from "./calculos"
 
@@ -14,13 +15,14 @@ interface TooltipMesProps {
 }
 
 function TooltipMes({ active, label, puntos }: TooltipMesProps) {
+  const simbolo = useSimboloMoneda()
   if (!active) return null
   const p = puntos.find((x) => x.etiqueta === label)
   if (!p) return null
   return (
     <div className="rounded-lg border bg-popover px-3 py-2 text-sm text-popover-foreground shadow-md tabular-nums">
       <p className="font-medium">{p.etiqueta}</p>
-      <p>{formatearImporte(p.suma)}</p>
+      <p>{formatearImporte(p.suma, simbolo)}</p>
       <p className="text-xs text-muted-foreground">
         {p.n} {p.n === 1 ? "ganada" : "ganadas"}
       </p>
@@ -30,6 +32,7 @@ function TooltipMes({ active, label, puntos }: TooltipMesProps) {
 
 /** Barras: suma de importe de oportunidades ganadas por mes (ganada_at en Lima). */
 export function GraficoGanadoPorMes({ puntos }: GraficoGanadoPorMesProps) {
+  const simbolo = useSimboloMoneda()
   const total = puntos.reduce((s, p) => s + p.suma, 0)
   const n = puntos.reduce((s, p) => s + p.n, 0)
   return (
@@ -37,7 +40,7 @@ export function GraficoGanadoPorMes({ puntos }: GraficoGanadoPorMesProps) {
       <CardHeader>
         <CardTitle>Ganado por mes</CardTitle>
         <CardDescription className="tabular-nums">
-          {formatearImporte(total)} en {puntos.length} meses · {n} {n === 1 ? "ganada" : "ganadas"}
+          {formatearImporte(total, simbolo)} en {puntos.length} meses · {n} {n === 1 ? "ganada" : "ganadas"}
         </CardDescription>
       </CardHeader>
       <CardContent>
