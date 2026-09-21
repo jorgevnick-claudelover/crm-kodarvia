@@ -3,3 +3,6 @@ dist
 dev-dist
 *.log
 .DS_Store
+
+# Notas de trabajo, no forman parte de la entrega
+docs/CORREOS.md
