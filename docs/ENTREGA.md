@@ -9,7 +9,7 @@ Se marca cada punto antes de enviar la entrega a Kodarvia. Fecha límite: 3 de o
 - [ ] Decidido con Kodarvia y el cliente en qué cuentas viven el repositorio, Supabase y Cloudflare Pages (ver PREGUNTAS.md).
 - [x] Repositorio en GitHub: https://github.com/jorgevnick-claudelover/crm-kodarvia (2026-09-13). Falta dar acceso al equipo revisor de Kodarvia.
 - [x] Proyecto Supabase `crm-gestoria`, plan Free, región São Paulo (2026-09-13).
-- [x] Cloudflare (Workers con recursos estáticos) conectado al repositorio, con las dos variables. URL pública: https://crm-kodarvia.jorgevnick.workers.dev
+- [x] GitHub Pages publicando desde el repositorio (21/09/2026). URL pública: https://jorgevnick-claudelover.github.io/crm-kodarvia/ · Cloudflare y Supabase quedan fuera de uso tras la exigencia de Kodarvia.
 - [ ] Anotado quién paga hosting y base de datos tras la entrega (hoy todo es gratuito).
 
 ## Base de datos
