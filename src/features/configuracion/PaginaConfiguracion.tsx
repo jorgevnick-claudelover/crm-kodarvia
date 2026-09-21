@@ -1,6 +1,7 @@
 /**
  * Configuración del estudio (solo administrador): etapas, motivos de pérdida, orígenes,
- * usuarios y valores por defecto. Pestañas en computadora; selector de sección en celular.
+ * usuarios, valores por defecto y los datos guardados en este navegador.
+ * Pestañas en computadora; selector de sección en celular.
  */
 import { useState } from "react"
 import { Link } from "react-router-dom"
@@ -18,8 +19,9 @@ import { PestanaMotivos } from "./PestanaMotivos"
 import { PestanaOrigenes } from "./PestanaOrigenes"
 import { PestanaUsuarios } from "./PestanaUsuarios"
 import { PestanaValores } from "./PestanaValores"
+import { PestanaDatos } from "./PestanaDatos"
 
-type Pestana = "etapas" | "motivos" | "origenes" | "usuarios" | "valores"
+type Pestana = "etapas" | "motivos" | "origenes" | "usuarios" | "valores" | "datos"
 
 const ETIQUETAS: Record<Pestana, string> = {
   etapas: "Etapas",
@@ -27,9 +29,10 @@ const ETIQUETAS: Record<Pestana, string> = {
   origenes: "Orígenes",
   usuarios: "Usuarios",
   valores: "Valores",
+  datos: "Datos",
 }
 
-const ORDEN: Pestana[] = ["etapas", "motivos", "origenes", "usuarios", "valores"]
+const ORDEN: Pestana[] = ["etapas", "motivos", "origenes", "usuarios", "valores", "datos"]
 
 export function PaginaConfiguracion() {
   const { esAdmin, cargando } = useUsuarioActual()
@@ -43,7 +46,7 @@ export function PaginaConfiguracion() {
       <Vacio
         icono={ShieldAlert}
         titulo="Solo para el administrador"
-        descripcion="La configuración del CRM (etapas, motivos, orígenes, usuarios y valores por defecto) la gestiona el administrador del estudio. Si necesitas un cambio aquí, pídeselo."
+        descripcion="La configuración del CRM (etapas, motivos, orígenes, usuarios, valores por defecto y los datos guardados) la gestiona el administrador del estudio. Si necesitas un cambio aquí, pídeselo."
         accion={
           <Button render={<Link to="/" />} nativeButton={false} size="lg" className="min-h-11">
             Volver a Hoy
@@ -101,6 +104,9 @@ export function PaginaConfiguracion() {
         </TabsContent>
         <TabsContent value="valores">
           <PestanaValores />
+        </TabsContent>
+        <TabsContent value="datos">
+          <PestanaDatos />
         </TabsContent>
       </Tabs>
     </div>

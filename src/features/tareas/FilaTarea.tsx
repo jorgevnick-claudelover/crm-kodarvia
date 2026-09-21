@@ -26,7 +26,7 @@ export interface FilaTareaProps {
 export function FilaTarea({ tarea, onEditar, formatoFecha = "relativa", className }: FilaTareaProps) {
   const { completar, reabrir } = useMutacionesTareas()
   const { uid, esAdmin } = useUsuarioActual()
-  // Solo el responsable (o el admin) puede marcarla, deshacerla o editarla: es lo que permite la RLS.
+  // Solo el responsable (o el admin) puede marcarla, deshacerla o editarla (src/lib/reglas.ts).
   const puedeEditar = esAdmin || tarea.responsable_id === uid
   const hecha = tarea.estado === "hecha"
   const vencida = estaVencida(tarea)

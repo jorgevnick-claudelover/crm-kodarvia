@@ -1,6 +1,6 @@
 /**
  * Prueba de humo en jsdom: la página de configuración solo la ve el administrador,
- * muestra las cinco secciones y explica por qué no se puede desactivar una etapa con
+ * muestra las seis secciones y explica por qué no se puede desactivar una etapa con
  * oportunidades abiertas.
  */
 import { act } from "react"
@@ -111,7 +111,7 @@ afterEach(async () => {
 })
 
 describe("PaginaConfiguracion", () => {
-  it("muestra las cinco secciones y las etapas ordenadas", async () => {
+  it("muestra las seis secciones y las etapas ordenadas", async () => {
     await renderizar(<PaginaConfiguracion />)
     const texto = contenedor.textContent ?? ""
     expect(texto).toContain("Etapas")
@@ -119,6 +119,7 @@ describe("PaginaConfiguracion", () => {
     expect(texto).toContain("Orígenes")
     expect(texto).toContain("Usuarios")
     expect(texto).toContain("Valores")
+    expect(texto).toContain("Datos")
     const nombres = Array.from(contenedor.querySelectorAll('li input[data-slot="input"]')).map((i) => (i as HTMLInputElement).value)
     expect(nombres).toEqual(["Nuevo", "Propuesta"])
   })
@@ -156,7 +157,7 @@ describe("PestanaUsuarios", () => {
     const texto = contenedor.textContent ?? ""
     expect(texto).toContain("Rosa Quispe")
     expect(texto).toContain("luis@estudio.pe")
-    expect(texto).toContain("crear-usuarios.mjs")
+    expect(texto).toContain("no tiene contraseñas")
     expect(texto).toContain("5 personas")
     const propioRol = contenedor.querySelector<HTMLButtonElement>('[aria-label="Rol de Rosa Quispe"]')
     const propioActivo = contenedor.querySelector<HTMLButtonElement>("#usuario-activo-u1")

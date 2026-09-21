@@ -1,18 +1,19 @@
-import { supabase } from "@/lib/supabase"
-import { fetchAll } from "@/lib/fetchAll"
+import { leer } from "@/lib/almacen"
 import type { HistorialEtapa } from "@/lib/types"
 import { rangoLima } from "./comun"
 
 /**
  * Historial de etapas de un rango de días (Lima, 'yyyy-MM-dd'), con todas las
- * filas (fetchAll). Base del embudo del panel. Sin `hasta` trae hasta hoy.
+ * filas. Base del embudo del panel. Sin `hasta` trae hasta hoy.
  */
 export async function listarHistorial(desde?: string, hasta?: string): Promise<HistorialEtapa[]> {
   const { desdeIso, hastaIso } = rangoLima(desde, hasta)
-  return fetchAll<HistorialEtapa>((inicio, fin) => {
-    let q = supabase.from("historial_etapas").select("*").order("created_at", { ascending: true }).order("id", { ascending: true })
-    if (desdeIso) q = q.gte("created_at", desdeIso)
-    if (hastaIso) q = q.lte("created_at", hastaIso)
-    return q.range(inicio, fin)
-  })
+  const filas = leer()
+    .historial_etapas.filter((h) => {
+      if (desdeIso && h.created_at < desdeIso) return false
+      if (hastaIso && h.created_at > hastaIso) return false
+      return true
+    })
+    .sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : a.id - b.id))
+  return Promise.resolve(filas)
 }

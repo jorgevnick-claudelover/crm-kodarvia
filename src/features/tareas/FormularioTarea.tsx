@@ -183,7 +183,7 @@ export function FormularioTarea({ abierto, onCerrar, contactoId, oportunidadId, 
 
   const puedeEditarResponsable = esAdmin && usuarios.length > 0
   const puedeBorrar = editando && (esAdmin || tarea?.responsable_id === uid)
-  // La tarea de otro se puede consultar, pero no guardar: es lo que permite la RLS.
+  // La tarea de otro se puede consultar, pero no guardar (src/lib/reglas.ts).
   const soloLectura = editando && !esAdmin && tarea?.responsable_id !== uid
   // En edición el contacto llega de la consulta: guardar antes lo borraría (contacto_id: null).
   const esperandoContacto = !!idContactoInicial && contactoInicial.isPending

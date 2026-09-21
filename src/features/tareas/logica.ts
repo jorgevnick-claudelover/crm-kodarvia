@@ -1,5 +1,5 @@
 /**
- * Lógica pura del módulo de tareas (sin React ni Supabase) para poder probarla con vitest:
+ * Lógica pura del módulo de tareas (sin React ni acceso a datos) para poder probarla con vitest:
  * título por defecto, conversión fecha+hora de Lima a UTC, agrupación Vencidas/Hoy/Próximos,
  * agrupación por día, avisos locales y filas de exportación.
  */

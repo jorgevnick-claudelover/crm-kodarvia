@@ -1,5 +1,5 @@
 /**
- * Lógica pura del módulo de oportunidades (sin React ni supabase): posiciones
+ * Lógica pura del módulo de oportunidades (sin React ni acceso a datos): posiciones
  * fraccionarias del tablero, sumas por columna, agrupación, filas de exportación.
  */
 import type { Etapa, EstadoOportunidad, OportunidadConRelaciones } from "@/lib/types"

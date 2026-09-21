@@ -1,4 +1,0 @@
-[
-  { "nombre": "Ana Quispe", "email": "ana@ejemplo.pe", "password": "cambiar-esta-clave-123", "rol": "admin" },
-  { "nombre": "Luis Mamani", "email": "luis@ejemplo.pe", "password": "cambiar-esta-clave-456", "rol": "miembro" }
-]

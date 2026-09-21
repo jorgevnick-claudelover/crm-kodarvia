@@ -1,6 +1,6 @@
 /**
  * Prueba de humo en jsdom: las pantallas y formularios del módulo renderizan con datos
- * simulados sin lanzar errores (no hay proyecto Supabase para probar contra datos reales).
+ * simulados sin lanzar errores (la capa de datos se prueba aparte, sobre el almacén local).
  */
 import { act, type ReactNode } from "react"
 import { createRoot, type Root } from "react-dom/client"

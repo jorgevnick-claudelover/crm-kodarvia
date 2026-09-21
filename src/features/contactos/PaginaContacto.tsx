@@ -126,7 +126,7 @@ function FilaOportunidad({ o }: { o: OportunidadConRelaciones }) {
   )
 }
 
-/** Sin `onHecha` (tarea de otro) no se pinta el botón: la RLS solo deja marcarla a su responsable. */
+/** Sin `onHecha` (tarea de otro) no se pinta el botón: solo su responsable puede marcarla. */
 function FilaTarea({ t, onHecha, completando }: { t: TareaConRelaciones; onHecha?: () => void; completando: boolean }) {
   const vencida = esVencida(t.vence_at)
   return (

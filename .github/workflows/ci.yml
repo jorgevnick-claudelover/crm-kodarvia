@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, localstorage]
   pull_request:
 
 jobs:
@@ -19,10 +19,5 @@ jobs:
         run: npm run typecheck
       - name: Pruebas
         run: npm test
-      - name: SQL
-        run: npm run validar-sql
       - name: Build
         run: npm run build
-        env:
-          VITE_SUPABASE_URL: https://ejemplo.supabase.co
-          VITE_SUPABASE_ANON_KEY: clave-de-ejemplo-para-el-build

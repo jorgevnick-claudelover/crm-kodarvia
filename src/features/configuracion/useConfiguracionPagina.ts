@@ -181,7 +181,7 @@ export interface MutacionesUsuarios {
   guardando: boolean
 }
 
-/** Rol y estado de los usuarios (solo admin; el alta se hace con el script o en Supabase). */
+/** Rol y estado de los usuarios (solo admin; las cinco personas vienen con los datos de ejemplo). */
 export function useMutacionesUsuarios(): MutacionesUsuarios {
   const queryClient = useQueryClient()
   const guardar = useMutation({

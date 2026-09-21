@@ -8,6 +8,7 @@ import {
   BellRing,
   CalendarCheck,
   Download,
+  Laptop,
   MoveRight,
   Phone,
   Search,
@@ -80,7 +81,7 @@ export const SECCIONES: SeccionAyuda[] = [
     titulo: "Mover de etapa",
     icono: MoveRight,
     texto:
-      "La oportunidad avanza por etapas hasta cerrarse. El cambio lo ven los demás al instante, sin recargar la página.",
+      "La oportunidad avanza por etapas hasta cerrarse. El cambio se ve al instante en las demás pestañas y ventanas abiertas en esta misma computadora o celular.",
     bloques: [
       {
         titulo: "En el celular",
@@ -111,7 +112,7 @@ export const SECCIONES: SeccionAyuda[] = [
       "Para perder: elija un Motivo y, si quiere, escriba un Detalle. Luego toque Confirmar pérdida.",
       "Si se cerró por error, abra la oportunidad y toque Reabrir.",
     ],
-    nota: "El motivo es obligatorio: sin motivo no se guarda, ni desde la app ni por detrás. Así el Panel puede decirle por qué se pierde el trabajo y no solo cuánto.",
+    nota: "El motivo es obligatorio: sin motivo no se guarda. Así el Panel puede decirle por qué se pierde el trabajo y no solo cuánto.",
   },
   {
     id: "tareas",
@@ -124,7 +125,7 @@ export const SECCIONES: SeccionAyuda[] = [
       "Elija la fecha con los chips y ajuste la Hora.",
       "Deje activado Avisarme.",
     ],
-    nota: "A la hora fijada, con la app abierta sale el aviso, y en Hoy aparece el bloque Recordatorios con los botones Visto y Hecha. El correo lo envía Kodarvia desde su propio sistema; la app solo deja el recordatorio preparado.",
+    nota: "A la hora fijada, con la app abierta, el aviso sale esté donde esté dentro del CRM. Si la tenía cerrada, el recordatorio le espera al volver a entrar y en Hoy aparece el bloque Recordatorios con los botones Visto y Hecha. No se envía ningún correo: el aviso vive dentro de la app.",
   },
   {
     id: "hoy",
@@ -203,6 +204,19 @@ export const SECCIONES: SeccionAyuda[] = [
       "Solo el administrador cambia el responsable, importa la hoja y entra en Configuración.",
       "Si intenta editar algo que no es suyo, la app lo avisa y no se pierde nada.",
     ],
+  },
+  {
+    id: "datos",
+    titulo: "Dónde se guardan los datos",
+    icono: Laptop,
+    texto:
+      "El CRM guarda todo dentro del navegador de esta computadora o de este celular. No hay servidor detrás: nada viaja a internet y nada se comparte solo con sus compañeros.",
+    pasos: [
+      "Lo que escribe aquí se ve al instante en las demás pestañas y ventanas abiertas en este mismo equipo.",
+      "Dos equipos distintos llevan dos CRM distintos: para pasar la información hay que exportarla y volver a cargarla.",
+      "El administrador tiene en Configuración → Datos el botón Descargar copia; hágalo de vez en cuando.",
+    ],
+    nota: "Si borra los datos de navegación del equipo, se borra también el CRM. La copia descargada es la única forma de recuperarlo.",
   },
   {
     id: "instalar",

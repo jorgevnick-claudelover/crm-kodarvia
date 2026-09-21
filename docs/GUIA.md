@@ -26,7 +26,7 @@ El contacto y su oportunidad se crean en el mismo formulario, de una sola vez. L
 
 ## Mover de etapa
 
-La oportunidad avanza por etapas hasta cerrarse. El cambio lo ven los demás al instante, sin recargar la página.
+La oportunidad avanza por etapas hasta cerrarse. El cambio se ve al instante en las demás pestañas y ventanas abiertas en esta misma computadora o celular.
 
 **En el celular**
 
@@ -49,7 +49,7 @@ Ganada y Perdida no son etapas: son el final de la oportunidad. Están al final 
 2. Para perder: elija un **Motivo** y, si quiere, escriba un **Detalle**. Luego toque **Confirmar pérdida**.
 3. Si se cerró por error, abra la oportunidad y toque **Reabrir**.
 
-> El motivo es obligatorio: sin motivo no se guarda, ni desde la app ni por detrás. Así el Panel puede decirle por qué se pierde el trabajo y no solo cuánto.
+> El motivo es obligatorio: sin motivo no se guarda. Así el Panel puede decirle por qué se pierde el trabajo y no solo cuánto.
 
 ## Tareas y recordatorios
 
@@ -59,7 +59,7 @@ Una tarea es el próximo paso con un contacto: un título, una fecha y una hora.
 2. Elija la fecha con los chips y ajuste la **Hora**.
 3. Deje activado **Avisarme**.
 
-> A la hora fijada, con la app abierta sale el aviso, y en **Hoy** aparece el bloque **Recordatorios** con los botones **Visto** y **Hecha**. El correo lo envía Kodarvia desde su propio sistema; la app solo deja el recordatorio preparado.
+> A la hora fijada, con la app abierta, el aviso sale esté donde esté dentro del CRM. Si la tenía cerrada, el recordatorio le espera al volver a entrar y en **Hoy** aparece el bloque **Recordatorios** con los botones **Visto** y **Hecha**. No se envía ningún correo: el aviso vive dentro de la app.
 
 ## La pantalla Hoy
 
@@ -119,6 +119,16 @@ Todos ven todo. Cada persona edita lo suyo, es decir los contactos, oportunidade
 1. Cualquiera puede apuntar una actividad o crear una tarea sobre un contacto de otro; así se cubren las vacaciones.
 2. Solo el administrador cambia el responsable, importa la hoja y entra en Configuración.
 3. Si intenta editar algo que no es suyo, la app lo avisa y no se pierde nada.
+
+## Dónde se guardan los datos
+
+El CRM guarda todo dentro del navegador de esta computadora o de este celular. No hay servidor detrás: nada viaja a internet y nada se comparte solo con sus compañeros.
+
+1. Lo que escribe aquí se ve al instante en las demás pestañas y ventanas abiertas en este mismo equipo.
+2. Dos equipos distintos llevan dos CRM distintos: para pasar la información hay que exportarla y volver a cargarla.
+3. El administrador tiene en **Configuración → Datos** el botón **Descargar copia**; hágalo de vez en cuando.
+
+> Si borra los datos de navegación del equipo, se borra también el CRM. La copia descargada es la única forma de recuperarlo.
 
 ## Instalar la app en el celular
 

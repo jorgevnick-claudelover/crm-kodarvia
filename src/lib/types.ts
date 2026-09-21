@@ -1,5 +1,5 @@
 /**
- * Tipos TypeScript de todas las tablas y enums (espejo de supabase/migrations/0001_init.sql).
+ * Tipos TypeScript de todas las tablas y enums del almacén local (src/lib/almacen.ts).
  * Los nombres de columnas son EXACTAMENTE los de docs/ARQUITECTURA.md sección 4.
  */
 
@@ -12,7 +12,6 @@ export type EstadoTarea = "pendiente" | "hecha"
 export type TipoActividad = "llamada" | "whatsapp" | "correo" | "reunion" | "nota"
 export type ResultadoActividad = "contesto" | "no_contesto" | "volver_a_llamar" | "interesado" | "no_interesado"
 export type DocTipo = "DNI" | "RUC" | "CE"
-export type EstadoRecordatorio = "pendiente" | "enviando" | "enviado" | "error" | "cancelado"
 export type ResultadoImportacion = "creado" | "fusionado" | "revisar"
 
 export const TIPOS_ACTIVIDAD: readonly TipoActividad[] = ["llamada", "whatsapp", "correo", "reunion", "nota"]
@@ -266,45 +265,6 @@ export type TareaInsert = {
 }
 export type TareaUpdate = Partial<TareaInsert>
 
-// ---------- recordatorios_correo (sin acceso desde el cliente; tipo informativo) ----------
-export type RecordatorioCorreo = {
-  id: string
-  tarea_id: string
-  usuario_id: string
-  email: string
-  enviar_at: string
-  enviar_local: string
-  asunto: string
-  cuerpo: string
-  url: string
-  estado: EstadoRecordatorio
-  intentos: number
-  bloqueado_hasta: string | null
-  enviado_at: string | null
-  ultimo_error: string | null
-  created_at: string
-  updated_at: string
-}
-export type RecordatorioCorreoInsert = {
-  id?: string
-  tarea_id: string
-  usuario_id: string
-  email: string
-  enviar_at: string
-  enviar_local: string
-  asunto: string
-  cuerpo: string
-  url: string
-  estado?: EstadoRecordatorio
-  intentos?: number
-  bloqueado_hasta?: string | null
-  enviado_at?: string | null
-  ultimo_error?: string | null
-  created_at?: string
-  updated_at?: string
-}
-export type RecordatorioCorreoUpdate = Partial<RecordatorioCorreoInsert>
-
 // ---------- actividades ----------
 export type Actividad = {
   id: string
@@ -412,7 +372,7 @@ export type ActividadConRelaciones = Actividad & {
   usuario: Usuario | null
 }
 
-/** Fila devuelta por la función SQL buscar(q). */
+/** Fila que devuelve la búsqueda global (src/lib/api/buscar.ts). */
 export type ResultadoBusqueda = {
   tipo: "contacto" | "oportunidad" | "tarea" | "actividad"
   id: string
@@ -422,43 +382,21 @@ export type ResultadoBusqueda = {
   fecha: string | null
 }
 
-// ---------- Tipo Database para supabase-js ----------
-type Tabla<Row, Insert, Update> = { Row: Row; Insert: Insert; Update: Update; Relationships: [] }
+// ---------- Nombres de tabla ----------
 
-export type Database = {
-  public: {
-    Tables: {
-      usuarios: Tabla<Usuario, UsuarioInsert, UsuarioUpdate>
-      etapas: Tabla<Etapa, EtapaInsert, EtapaUpdate>
-      motivos_perdida: Tabla<MotivoPerdida, MotivoPerdidaInsert, MotivoPerdidaUpdate>
-      origenes: Tabla<Origen, OrigenInsert, OrigenUpdate>
-      contactos: Tabla<Contacto, ContactoInsert, ContactoUpdate>
-      oportunidades: Tabla<Oportunidad, OportunidadInsert, OportunidadUpdate>
-      historial_etapas: Tabla<HistorialEtapa, HistorialEtapaInsert, HistorialEtapaUpdate>
-      tareas: Tabla<Tarea, TareaInsert, TareaUpdate>
-      recordatorios_correo: Tabla<RecordatorioCorreo, RecordatorioCorreoInsert, RecordatorioCorreoUpdate>
-      actividades: Tabla<Actividad, ActividadInsert, ActividadUpdate>
-      importaciones: Tabla<Importacion, ImportacionInsert, ImportacionUpdate>
-      configuracion: Tabla<Configuracion, ConfiguracionInsert, ConfiguracionUpdate>
-    }
-    Views: Record<string, never>
-    Functions: {
-      es_admin: { Args: Record<string, never>; Returns: boolean }
-      mover_oportunidad: { Args: { p_id: string; p_etapa_id: string; p_posicion: number }; Returns: undefined }
-      buscar: { Args: { q: string }; Returns: ResultadoBusqueda[] }
-      recordatorios_pendientes_usuario: { Args: Record<string, never>; Returns: Tarea[] }
-    }
-    Enums: {
-      rol_usuario: RolUsuario
-      estado_oportunidad: EstadoOportunidad
-      estado_tarea: EstadoTarea
-      tipo_actividad: TipoActividad
-      resultado_actividad: ResultadoActividad
-      doc_tipo: DocTipo
-    }
-    CompositeTypes: Record<string, never>
-  }
-}
-
-/** Nombres de tabla usados como primer elemento de las claves de TanStack Query. */
-export type NombreTabla = keyof Database["public"]["Tables"]
+/**
+ * Nombres de tabla usados como primer elemento de las claves de TanStack Query
+ * y como tablas del almacén local (src/lib/almacen.ts, constante TABLAS).
+ */
+export type NombreTabla =
+  | "usuarios"
+  | "etapas"
+  | "motivos_perdida"
+  | "origenes"
+  | "contactos"
+  | "oportunidades"
+  | "historial_etapas"
+  | "tareas"
+  | "actividades"
+  | "importaciones"
+  | "configuracion"

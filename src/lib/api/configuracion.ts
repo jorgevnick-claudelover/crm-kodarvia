@@ -1,6 +1,11 @@
-import { supabase } from "@/lib/supabase"
+/**
+ * Configuración del estudio (pares clave/valor) sobre el almacén local.
+ * Todos la leen; solo el administrador la cambia (antes RLS, ahora `exigirAdmin`).
+ */
+import { escribir, leer } from "@/lib/almacen"
+import { exigirAdmin } from "@/lib/reglas"
+import { usuarioActual } from "@/lib/sesion"
 import type { ClaveConfiguracion, Json, ValoresConfiguracion } from "@/lib/types"
-import { lanzarSi } from "./comun"
 
 export const CONFIGURACION_DEFAULT: ValoresConfiguracion = {
   timezone: "America/Lima",
@@ -12,7 +17,8 @@ export const CONFIGURACION_DEFAULT: ValoresConfiguracion = {
   url_app: typeof window !== "undefined" ? window.location.origin : "",
 }
 
-function leer<K extends ClaveConfiguracion>(clave: K, valor: Json | undefined): ValoresConfiguracion[K] {
+/** Valor guardado para una clave, o el valor por defecto si falta o no sirve. */
+function valorDe<K extends ClaveConfiguracion>(clave: K, valor: unknown): ValoresConfiguracion[K] {
   const porDefecto = CONFIGURACION_DEFAULT[clave]
   if (valor === undefined || valor === null) return porDefecto
   if (typeof porDefecto === "number") {
@@ -25,32 +31,29 @@ function leer<K extends ClaveConfiguracion>(clave: K, valor: Json | undefined): 
 
 /** Devuelve todas las claves conocidas, con valores por defecto si faltan. */
 export async function obtenerTodo(): Promise<ValoresConfiguracion> {
-  const { data, error } = await supabase.from("configuracion").select("*")
-  lanzarSi(error, "No se pudo cargar la configuración")
-  const mapa = new Map<string, Json>((data ?? []).map((f) => [f.clave, f.valor]))
+  const guardada = leer().configuracion
   return {
-    timezone: leer("timezone", mapa.get("timezone")),
-    moneda: leer("moneda", mapa.get("moneda")),
-    hora_recordatorio: leer("hora_recordatorio", mapa.get("hora_recordatorio")),
-    importe_default: leer("importe_default", mapa.get("importe_default")),
-    nombre_empresa: leer("nombre_empresa", mapa.get("nombre_empresa")),
-    titulo_oportunidad_default: leer("titulo_oportunidad_default", mapa.get("titulo_oportunidad_default")),
-    url_app: leer("url_app", mapa.get("url_app")),
+    timezone: valorDe("timezone", guardada.timezone),
+    moneda: valorDe("moneda", guardada.moneda),
+    hora_recordatorio: valorDe("hora_recordatorio", guardada.hora_recordatorio),
+    importe_default: valorDe("importe_default", guardada.importe_default),
+    nombre_empresa: valorDe("nombre_empresa", guardada.nombre_empresa),
+    titulo_oportunidad_default: valorDe("titulo_oportunidad_default", guardada.titulo_oportunidad_default),
+    url_app: valorDe("url_app", guardada.url_app),
   }
 }
 
-/** Guarda (upsert) una clave. Solo admin (RLS). */
+/** Guarda una clave. Solo administrador. */
 export async function guardar<K extends ClaveConfiguracion>(clave: K, valor: ValoresConfiguracion[K]): Promise<void> {
-  const { error } = await supabase.from("configuracion").upsert({ clave, valor }, { onConflict: "clave" })
-  lanzarSi(error, "No se pudo guardar la configuración")
+  await guardarVarias({ [clave]: valor } as Partial<ValoresConfiguracion>)
 }
 
-/** Guarda varias claves a la vez. */
+/** Guarda varias claves a la vez. Solo administrador. */
 export async function guardarVarias(valores: Partial<ValoresConfiguracion>): Promise<void> {
-  const filas = (Object.keys(valores) as ClaveConfiguracion[])
-    .filter((k) => valores[k] !== undefined)
-    .map((k) => ({ clave: k, valor: valores[k] as Json }))
-  if (filas.length === 0) return
-  const { error } = await supabase.from("configuracion").upsert(filas, { onConflict: "clave" })
-  lanzarSi(error, "No se pudo guardar la configuración")
+  const claves = (Object.keys(valores) as ClaveConfiguracion[]).filter((k) => valores[k] !== undefined)
+  if (claves.length === 0) return
+  exigirAdmin(usuarioActual(), "cambiar la configuración")
+  escribir((db) => {
+    for (const clave of claves) db.configuracion[clave] = valores[clave] as Json
+  })
 }

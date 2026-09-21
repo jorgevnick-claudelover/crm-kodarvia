@@ -1,0 +1,47 @@
+name: Publicar en GitHub Pages
+
+on:
+  push:
+    branches: [localstorage, main]
+  workflow_dispatch:
+
+# El token solo necesita leer el repo y poder publicar en Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Una publicación a la vez. No se cancela la que esté en curso: cancelar un despliegue
+# a medias puede dejar el sitio en un estado raro, y el siguiente lo sobrescribe igual.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Pruebas
+        run: npm test
+      - name: Build
+        run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4

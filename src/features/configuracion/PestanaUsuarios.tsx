@@ -1,6 +1,7 @@
 /**
- * Usuarios del estudio: nombre, correo, rol y activo. El alta se hace fuera de la app
- * (script o panel de Supabase). El administrador actual no puede quitarse el rol a sí mismo.
+ * Usuarios del estudio: nombre, correo, rol y activo. Los cinco vienen con los datos
+ * de ejemplo del navegador; desde aquí se cambian rol y acceso, no se dan de alta.
+ * El administrador actual no puede quitarse el rol a sí mismo.
  */
 import { toast } from "sonner"
 import { Info } from "lucide-react"
@@ -48,9 +49,8 @@ export function PestanaUsuarios() {
       <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
       <div className="space-y-1">
         <p>
-          Los usuarios nuevos no se crean desde aquí: se crean con el script{" "}
-          <code className="rounded bg-background px-1 py-0.5 text-xs">scripts/crear-usuarios.mjs</code> o desde el panel de Supabase
-          (Authentication → Users). Al entrar por primera vez, su perfil aparece en esta lista.
+          Esta versión no tiene contraseñas: al abrir el CRM se elige con quién trabajar entre las personas de esta lista, que
+          vienen con los datos de ejemplo de este navegador.
         </p>
         <p>El encargo cubre hasta 5 personas. Para dejar de dar acceso a alguien, desactívalo aquí; así se conserva su historial.</p>
       </div>
@@ -70,7 +70,10 @@ export function PestanaUsuarios() {
     return (
       <section className="space-y-4" aria-label="Usuarios">
         {ayuda}
-        <Vacio titulo="Todavía no hay usuarios" descripcion="Créalos con el script o en el panel de Supabase y vuelve a esta pantalla." />
+        <Vacio
+          titulo="Todavía no hay usuarios"
+          descripcion="Vuelve a crear los datos de ejemplo desde la pestaña Datos y las cinco personas del estudio reaparecerán aquí."
+        />
       </section>
     )
   }

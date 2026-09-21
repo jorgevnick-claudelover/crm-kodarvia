@@ -1,62 +1,50 @@
-# Correo para Kodarvia
+# Correos con Kodarvia
 
-Un solo correo, dirigido a Kodarvia, que es quien hace de intermediario con la gestoría. Enseña la app funcionando, pide lo que falta del cliente y pide su opinión.
-
-**Enlace de la app:** https://crm-kodarvia.jorgevnick.workers.dev
 **Repositorio:** https://github.com/jorgevnick-claudelover/crm-kodarvia
-
-Las contraseñas de prueba van por canal privado, nunca dentro del correo.
+**Enlace de la app:** pendiente de GitHub Pages
 
 ---
 
-**Asunto:** CRM gestoría Arequipa · ya funciona, faltan los datos del cliente
+## Mensaje a enviar ahora (21 de septiembre de 2026)
+
+Explica por qué localStorage y el trabajo en equipo no encajan, sin discutir la decisión, y les deja elegir. Va acompañado de que la adaptación ya está en marcha, para que no parezca una excusa para no hacerlo.
+
+**Asunto:** RE: CRM gestoría Arequipa · adaptación a localStorage y una consulta sobre los criterios 2 y 5
 
 Hola:
 
-El CRM ya está terminado y desplegado. Toda la estructura funciona y se puede probar ahora mismo:
+Entendido. Ya estoy pasando la aplicación a React con localStorage, sin backend ni base de datos, y la entrega será el repositorio de GitHub con la previsualización en GitHub Pages, que es del propio GitHub y no un servicio mío.
 
-**https://crm-kodarvia.jorgevnick.workers.dev**
+También me queda claro lo de los recordatorios: si basta con que queden programados y visibles en la interfaz para su responsable, lo resuelvo dentro de la app y no preparo ninguna cola. Eso simplifica.
 
-Os mando por privado tres usuarios de prueba: un administrador y dos vendedores, para que veáis cómo cambian los permisos entre unos y otros. Dentro hay datos de ejemplo cargados para que se vea lleno.
+Antes de terminarlo quiero plantearos una cosa, porque afecta a dos de vuestros criterios de aceptación y prefiero que lo decidáis vosotros ahora y no descubrirlo en la revisión.
 
-Está todo lo del encargo: fichas de contacto, oportunidades en tablero con arrastrar y soltar, motivo obligatorio al perder, tareas con recordatorio, registro de actividad, búsqueda global, panel con embudo mensual, importación desde Excel y exportación a CSV respetando los filtros. Y la guía de uso está dentro de la propia app, en la sección Ayuda.
+**Qué es localStorage.** Es el almacén que el navegador reserva para cada web, dentro del dispositivo. Los datos que guarda no salen de ese navegador: no viajan a ningún sitio, no hay nada que los sincronice y ningún otro dispositivo puede leerlos. Si Ana usa su celular y Luis el suyo, cada uno tiene su propia copia, separada e invisible para el otro. Lo que Ana cree no aparecerá nunca en el celular de Luis.
 
-He comprobado los ocho criterios de aceptación contra la base de datos real. Dos apuntes por si os ahorran trabajo al revisar:
+Eso choca con dos criterios:
 
-- **El cambio de etapa se ve al instante**: abridlo en dos dispositivos con usuarios distintos, mirad el tablero en los dos y mover una tarjeta en uno. En el otro cambia sola, sin recargar.
-- **Las horas son siempre de Lima**, que es la del cliente. Si revisáis desde España veréis siete horas de diferencia con vuestro reloj, y es lo correcto. Lo digo porque es fácil dar por fallado el criterio del recordatorio si no se tiene en cuenta.
+**Criterio 2, «mover una oportunidad se refleja al instante para todos».** Puedo hacer que se refleje al instante entre pestañas y ventanas del mismo navegador, y lo voy a hacer. Entre dos dispositivos es imposible, porque no hay nada que los conecte.
 
-## Lo que falta, y es cosa del cliente
+**Criterio 5, «cada usuario edita solo lo suyo; el responsable edita todo».** La aplicación respetará la propiedad: cada contacto, oportunidad y tarea queda a nombre de quien la crea, los demás la ven pero no pueden editarla, y solo el administrador edita todo y reasigna. Lo que no puedo es verificar quién entra, porque no hay servidor que valide una contraseña: quedará un selector de usuario al inicio y cualquiera podrá elegir cualquier nombre. Es una simulación coherente, no una restricción real.
 
-Solo quedan detalles de contenido. Si se lo podéis pedir a la gestoría, lo dejo cerrado en cuanto llegue:
+Dicho de otra forma: con localStorage el CRM funciona perfectamente como herramienta de una persona, o de varias que comparten el mismo equipo. Lo que no puede es ser una herramienta de equipo repartida entre cinco celulares, que es el problema que el briefing describe cuando habla de que los contactos se quedan en pausa cuando alguien se va de vacaciones.
 
-1. **Su hoja de contactos actual**, con todas las columnas y todas las pestañas, en el Excel original. Puede venir anonimizada o con los nombres cambiados. Con veinte filas de muestra me vale para empezar; la completa la cargo al final, de una vez y sin perder ninguna fila.
-2. **Las etapas y los motivos de pérdida que usan hoy**, en orden y con el nombre exacto que ellos les dan. Ahora hay unos de ejemplo que se cambian en dos minutos desde la propia app.
-3. **El logotipo** en PNG o SVG, y el color de su marca si lo tienen.
+**Tres salidas, y me adapto a la que digáis:**
 
-Y tres preguntas cortas para ellos, que cambian cómo queda cada ficha:
+1. **Entregar así, como demostración.** Es lo que estoy haciendo y lo tengo listo en pocos días. Acordamos por escrito que los criterios 2 y 5 se revisan en un mismo equipo con varias pestañas, y queda cerrado.
+2. **Que el cliente lo use de verdad entre varias personas.** Entonces hace falta algún almacenamiento compartido. No tiene por qué ser mío ni suponeros coste: Lovable, que mencionáis como alternativa en el propio encargo, incorpora esa pieza de serie, y hay opciones gratuitas. La aplicación ya está construida para funcionar de las dos maneras, así que el cambio es de horas, no de días.
+3. **Otra cosa que tengáis en mente** y que yo no esté viendo. Si es así, decídmelo y me adapto.
 
-- ¿Identifican a cada independiente por **RUC o DNI**? Si viene en la hoja lo uso para detectar repetidos, que es más fiable que el celular.
-- ¿Quieren **WhatsApp** como tipo de contacto, junto a la llamada y la reunión?
-- ¿A qué **hora** prefieren el aviso de las tareas del día? Por defecto está a las nueve de la mañana.
-
-Si les podéis dar también el enlace para que lo prueben desde el celular, mejor: que metan lo que quieran con confianza, porque al cargar su hoja real se borra todo lo de prueba y se empieza limpio. Lo que más me interesa saber de ellos es qué les sobra, qué les falta y si alguna palabra no es la que usan en el estudio.
-
-## Lo que necesito de vosotros
-
-1. **Cómo conectáis el correo de los recordatorios.** La app ya deja cada aviso preparado en una cola, con destinatario, asunto, cuerpo, enlace y hora. Solo hay que leerla y enviar. Os adjunto el documento con las tres formas de hacerlo; elegid la que os encaje y me adapto. Si ya tenéis un mecanismo estándar de otros encargos, decídmelo y lo cumplo.
-2. **Acceso al repositorio**: decidme el usuario de GitHub de quien vaya a revisar y le doy permiso.
-3. **Vuestra opinión.** Si algo no os cuadra, prefiero saberlo ahora que en la entrega.
-4. **Condiciones**: si el pago es a la aceptación, cuántas rondas de revisión incluye y de quién es el código al entregarlo.
-
-Una aclaración sobre el stack. El portal indicaba React con localStorage. He construido con React y una base de datos compartida, porque con localStorage los datos no salen del navegador de cada persona: el cambio de etapa no lo verían los demás, los permisos por usuario no serían reales y vosotros no tendríais de dónde leer los recordatorios. Es el mismo React del encargo, sin coste añadido, y funcionando de verdad.
-
-Quedo atento a lo que me digáis.
+Sigo adelante con la primera mientras me respondéis, para no perder tiempo. Solo quería que la decisión fuera vuestra y estuviera dicha antes de la entrega.
 
 Un saludo
 
 ---
 
-## Recordatorio corto, si en tres días no contestan
+## Pendiente de la gestoría, sin respuesta desde el 13 de septiembre
 
-Buenas, ¿pudisteis ver el CRM? Sobre todo me interesa que la gestoría me pase su hoja de contactos aunque sea con veinte filas, y la lista de etapas y motivos de pérdida que usan. Con eso lo dejo cerrado. Gracias.
+1. Su hoja de contactos actual, con todas las columnas y pestañas, en el Excel original. Puede venir anonimizada. Con veinte filas de muestra vale para empezar.
+2. Las etapas y los motivos de pérdida que usan hoy, en orden y con su nombre exacto.
+3. El logotipo en PNG o SVG, y el color de marca.
+
+Y tres preguntas para ellos: si identifican a cada independiente por RUC o DNI, si quieren WhatsApp como tipo de contacto, y a qué hora prefieren el aviso de las tareas del día.

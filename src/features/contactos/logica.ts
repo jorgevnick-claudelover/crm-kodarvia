@@ -1,5 +1,5 @@
 /**
- * Lógica pura del módulo de contactos (sin React ni supabase): se prueba con vitest.
+ * Lógica pura del módulo de contactos (sin React ni acceso a datos): se prueba con vitest.
  */
 import { FILTROS_CONTACTOS_DEFAULT, type FiltrosContactos } from "@/lib/api/contactos"
 import type { ContactoConRelaciones, DocTipo } from "@/lib/types"

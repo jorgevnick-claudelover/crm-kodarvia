@@ -1,94 +1,84 @@
 # CRM Gestoría
 
-CRM muy simple para un estudio contable de facturación electrónica en Arequipa (Perú): contactos, oportunidades por etapas, tareas con recordatorio, actividad, panel, importación desde Excel y exportación a CSV. Hasta 5 usuarios, celular primero, PWA instalable. Backend en Supabase (Auth, Postgres con RLS, Realtime). El diseño completo está en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
+CRM muy simple para un estudio contable de facturación electrónica en Arequipa (Perú): contactos, oportunidades por etapas, tareas con recordatorio, actividad, panel, importación desde Excel y exportación a CSV. Hasta 5 usuarios, celular primero, PWA instalable.
+
+**No hay backend.** Toda la lógica y todos los datos viven en el navegador: React más una única clave de `localStorage`. No hay servidor, ni base de datos, ni variables de entorno que rellenar. El diseño completo está en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
 
 ## Requisitos
 
 - Node 20 o superior (en este Mac está en `~/.local/node/bin`; si `node` no se encuentra: `export PATH="$HOME/.local/node/bin:$PATH"`).
-- Un proyecto en [Supabase](https://supabase.com) (plan gratuito sirve).
-- Para desplegar: cuenta en Cloudflare Pages y el repositorio en GitHub.
+- Nada más. No hace falta cuenta en ningún servicio para trabajar en local.
 
-## Instalar
+## Instalar y arrancar
 
 ```bash
 npm install
-cp .env.example .env.local   # y rellena las dos variables
-npm run dev                  # http://localhost:5173
+npm run dev     # http://localhost:5173/crm-kodarvia/
 ```
 
-### `.env.local`
+La primera vez que se abre, la app siembra sola sus datos de partida: las 5 etapas del tablero, los 6 motivos de pérdida, los 7 orígenes, los valores por defecto del estudio y las 5 personas del equipo. No hay contraseñas: en la pantalla de entrada se elige con quién trabajar y se entra de un toque.
 
-```
-VITE_SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJ...
-```
+## Dónde viven los datos
 
-Los valores están en Supabase › **Project Settings › API**. La clave `anon` es pública por diseño: la seguridad la dan las políticas RLS. Sin estas variables la app muestra la pantalla "Falta configurar Supabase" en lugar de romperse.
+Todo el CRM se guarda en la clave `crm.datos` de `localStorage`, como un único objeto JSON. De ahí salen varias consecuencias que conviene tener claras:
 
-## Aplicar la migración en Supabase
+- **Por navegador y por equipo.** Dos computadoras, o dos navegadores en la misma computadora, llevan dos CRM independientes. No hay sincronización posible sin servidor.
+- **Entre pestañas sí.** Lo que se guarda en una pestaña aparece al instante en las demás pestañas y ventanas del mismo navegador (evento `storage`).
+- **Cabe unos 5 MB**, el límite habitual de `localStorage`. La app avisa y se niega a guardar antes de llegar al tope, para no perder datos a medias.
+- **En modo incógnito** funciona igual durante la sesión, pero al cerrar la ventana se pierde todo.
 
-Opción A (sin instalar nada): en el panel de Supabase abre **SQL Editor**, pega el contenido de `supabase/migrations/0001_init.sql` y ejecútalo; después pega y ejecuta `supabase/seed.sql` (catálogos de ejemplo y configuración inicial).
+### Copia de seguridad y borrar los datos de ejemplo
 
-Opción B (con la CLI de Supabase):
+En la app, **Configuración → Datos** (solo el administrador):
 
-```bash
-npx supabase login
-npx supabase link --project-ref xxxxxxxxxxxx
-npx supabase db push
-psql "$DATABASE_URL" -f supabase/seed.sql
-```
+- **Descargar copia**: baja todo el CRM como un archivo `.json`. Es la única red de seguridad que existe; conviene hacerlo de vez en cuando.
+- **Restaurar copia**: vuelve a cargar uno de esos archivos y reemplaza lo que haya en este navegador.
+- **Borrar datos de ejemplo**: deja el CRM como recién instalado. Se borra todo lo creado y vuelven las etapas, los motivos, los orígenes y las cinco personas del estudio.
 
-La migración crea las tablas, los triggers, las funciones (`mover_oportunidad`, `buscar`, `recordatorios_pendientes_usuario`, …), las políticas RLS y la publicación realtime. Los recordatorios por correo los envía Kodarvia leyendo la cola `recordatorios_correo` según [`docs/CONTRATO-RECORDATORIOS.md`](docs/CONTRATO-RECORDATORIOS.md).
+A mano, lo mismo se consigue borrando la clave `crm.datos` desde las herramientas del navegador (Application → Local Storage) y recargando.
 
-## Crear usuarios
+## Desplegar en GitHub Pages
 
-Los usuarios se crean en Supabase Auth (correo y contraseña); un trigger crea su perfil en la tabla `usuarios`. **El primer usuario creado es el administrador.**
+El repositorio es `jorgevnick-claudelover/crm-kodarvia` y la app se publica en
+`https://jorgevnick-claudelover.github.io/crm-kodarvia/`. Como no hay backend, el despliegue es solo
+subir `dist/` a un hosting estático.
 
-- Con el script (necesita la clave de servicio, que nunca va al cliente):
+1. En GitHub › **Settings › Pages › Build and deployment**, elige **GitHub Actions** como *Source*.
+2. Empuja a `localstorage` o a `main`: [`.github/workflows/pages.yml`](.github/workflows/pages.yml)
+   pasa las pruebas, construye y publica con las acciones oficiales
+   (`configure-pages`, `upload-pages-artifact`, `deploy-pages`).
 
-  ```bash
-  SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co SUPABASE_SERVICE_ROLE_KEY=eyJ... node scripts/crear-usuarios.mjs
-  ```
+Dos detalles del build que hacen falta para que esto funcione bajo un subdirectorio:
 
-  Mira la cabecera de `scripts/crear-usuarios.mjs` para el formato de la lista de usuarios.
-- O a mano en Supabase › **Authentication › Users › Add user** (marca "Auto confirm").
+- `vite.config.ts` fija `base: '/crm-kodarvia/'`, y el router recibe ese mismo prefijo como `basename`.
+- GitHub Pages no sabe reescribir rutas a `index.html`, así que al recargar en `/crm-kodarvia/contactos`
+  devolvería un 404. Su convención es servir `404.html` en esos casos: el build copia `index.html`
+  a `dist/404.html` y la app arranca igual, leyendo la URL real.
 
-Después, el administrador puede cambiar nombre, rol y estado de cada usuario desde **Configuración › Usuarios** en la app.
-
-## Desplegar en Cloudflare Pages
-
-1. Sube el repositorio a GitHub.
-2. En Cloudflare › **Workers & Pages › Create › Pages › Connect to Git**, elige el repositorio.
-3. Configuración de build:
-   - Framework preset: **None** (o Vite)
-   - Build command: `npm run build`
-   - Build output directory: `dist`
-4. Variables de entorno (Production y Preview): `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
-5. Despliega. `public/_redirects` (`/* /index.html 200`) hace que las rutas de la SPA funcionen al recargar.
-6. En Supabase › **Authentication › URL Configuration** añade la URL de Cloudflare como *Site URL* y en *Redirect URLs* (para "Olvidé mi contraseña"). En la app, **Configuración › Valores › URL de la app** debe apuntar a la misma URL: es la que llevan los correos de recordatorio.
-
-Cada push a `main` genera un despliegue de producción y cada rama una URL de previsualización.
+Para publicarlo en otro sitio (o en otro repositorio) basta cambiar `BASE` en `vite.config.ts`.
 
 ## Comandos
 
 | Comando | Qué hace |
 |---|---|
-| `npm run dev` | Servidor de desarrollo en http://localhost:5173 |
+| `npm run dev` | Servidor de desarrollo en http://localhost:5173/crm-kodarvia/ |
 | `npm run typecheck` | Comprobación de tipos (obligatoria antes de dar algo por terminado) |
-| `npm run build` | Typecheck + build de producción en `dist/` |
+| `npm run build` | Typecheck + build de producción en `dist/` (incluye `404.html`) |
 | `npm run preview` | Sirve `dist/` para probar la PWA |
-| `npm test` | Pruebas con vitest (utilidades puras) |
+| `npm test` | Pruebas con vitest |
 | `npm run test:watch` | Pruebas en modo continuo |
 
 ## Estructura de carpetas
 
 ```
 src/
-  main.tsx  App.tsx (router, TanStack Query con caché en localStorage)  index.css
+  main.tsx  App.tsx (router con basename, TanStack Query con caché en localStorage)  index.css
   lib/
-    supabase.ts            cliente supabase + supabaseConfigurado
-    types.ts               tipos de todas las tablas, enums y tipo Database
-    fetchAll.ts            pagina .range() de 1000 en 1000
+    almacen.ts             la base de datos: leer() / escribir() sobre la clave crm.datos
+    semilla.ts             datos de partida (catálogos, configuración y las 5 personas)
+    reglas.ts              las reglas de negocio que antes imponía Postgres, como funciones puras
+    sesion.ts              quién trabaja ahora (clave crm.usuario), sin contraseñas
+    types.ts               tipos de todas las tablas y enums
     api/                   todo el acceso a datos (contactos, oportunidades, tareas, actividades,
                            catalogos, usuarios, buscar, importaciones, configuracion, comun)
     utils/                 cn, fechas (America/Lima), telefono (+51), moneda (S/), csv, texto
@@ -97,16 +87,13 @@ src/
   components/
     ui/                    shadcn/ui (Base UI)
     layout/                AppShell, BarraInferior, BarraLateral, Cabecera, BotonMas,
-                           RequiereSesion, RequiereAdmin, PantallaSinSupabase
+                           RequiereSesion, RequiereAdmin
     comunes/               SelectorContacto, ChipsFecha, ChipsSeleccion, AvatarUsuario, Importe,
                            EnlaceTelefono, Vacio, Cargando, BotonExportar, PanelFormulario
   features/                una carpeta por módulo: auth, hoy, contactos, oportunidades, tareas,
                            actividades, buscar, panel, importar, configuracion, ayuda
-supabase/
-  migrations/0001_init.sql  seed.sql  functions/recordatorios/
-scripts/crear-usuarios.mjs
-docs/                      ARQUITECTURA.md, DECISIONES.md, DECISIONES-APP.md, CONTRATO-RECORDATORIOS.md
-public/                    _redirects, favicon.svg, logo.svg, icons/
+docs/                      ARQUITECTURA.md, ACEPTACION.md, DECISIONES*.md, GUIA.md
+public/                    favicon.svg, logo.svg, icons/
 ```
 
-Reglas de código: TypeScript estricto sin `any`; acceso a datos solo en `src/lib/api/*`; fechas siempre por `src/lib/utils/fechas.ts` (zona `America/Lima`); interfaz en español de Perú. Las decisiones que se desvían del diseño se anotan en `docs/DECISIONES.md` y `docs/DECISIONES-APP.md`.
+Reglas de código: TypeScript estricto sin `any`; acceso a datos solo en `src/lib/api/*`, que a su vez solo habla con `src/lib/almacen.ts`; fechas siempre por `src/lib/utils/fechas.ts` (zona `America/Lima`); interfaz en español de Perú. Las decisiones que se desvían del diseño se anotan en `docs/DECISIONES.md` y `docs/DECISIONES-APP.md`.

@@ -1,5 +1,5 @@
 /**
- * Prueba de humo: renderiza la lista y la ficha con datos simulados (sin Supabase)
+ * Prueba de humo: renderiza la lista y la ficha con datos simulados (sin tocar el almacén)
  * y comprueba que aparecen los textos clave. Los formularios de otros módulos se sustituyen.
  */
 import { act } from "react"

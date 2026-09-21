@@ -1,10 +1,9 @@
-import { useQuery } from "@tanstack/react-query"
 import type { Usuario } from "@/lib/types"
-import * as apiUsuarios from "@/lib/api/usuarios"
+import { esAdmin as esAdministrador } from "@/lib/reglas"
 import { useSesion } from "./useSesion"
 
 export interface UsuarioActual {
-  /** Perfil de la tabla usuarios del uid actual (null si no hay sesión o aún carga). */
+  /** Perfil del usuario con el que se está trabajando (null si nadie ha entrado). */
   usuario: Usuario | null
   uid: string | null
   email: string | null
@@ -13,23 +12,19 @@ export interface UsuarioActual {
   error: Error | null
 }
 
-/** Perfil del usuario con sesión. Clave ['usuarios', 'actual', uid]: realtime la invalida por 'usuarios'. */
+/**
+ * Usuario con el que se está trabajando, leído del almacén local. Se actualiza solo
+ * cuando cambia la tabla `usuarios` (aquí o en otra pestaña) o cuando se cambia de usuario.
+ */
 export function useUsuarioActual(): UsuarioActual {
-  const { sesion, cargando: cargandoSesion } = useSesion()
-  const uid = sesion?.user.id ?? null
-  const consulta = useQuery({
-    queryKey: ["usuarios", "actual", uid],
-    queryFn: () => (uid ? apiUsuarios.obtener(uid) : Promise.resolve(null)),
-    enabled: !!uid,
-    staleTime: 5 * 60 * 1000,
-  })
-  const usuario = consulta.data ?? null
+  const { sesion, cargando } = useSesion()
+  const usuario = sesion?.usuario ?? null
   return {
     usuario,
-    uid,
-    email: sesion?.user.email ?? null,
-    esAdmin: usuario?.rol === "admin" && usuario.activo,
-    cargando: cargandoSesion || (!!uid && consulta.isPending),
-    error: consulta.error,
+    uid: usuario?.id ?? null,
+    email: usuario?.email ?? null,
+    esAdmin: esAdministrador(usuario),
+    cargando,
+    error: null,
   }
 }

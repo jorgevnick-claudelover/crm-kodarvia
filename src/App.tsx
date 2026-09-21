@@ -4,11 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { PersistQueryClientProvider, type Persister } from "@tanstack/react-query-persist-client"
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister"
 import { AppShell } from "@/components/layout/AppShell"
-import { PantallaSinSupabase } from "@/components/layout/PantallaSinSupabase"
 import { RequiereAdmin } from "@/components/layout/RequiereAdmin"
 import { RequiereSesion } from "@/components/layout/RequiereSesion"
 import { realtime } from "@/hooks/useRealtime"
-import { supabaseConfigurado } from "@/lib/supabase"
 import { PaginaLogin } from "@/features/auth/PaginaLogin"
 import { PaginaHoy } from "@/features/hoy/PaginaHoy"
 import { PaginaContactos } from "@/features/contactos/PaginaContactos"
@@ -21,6 +19,12 @@ import { PaginaPanel } from "@/features/panel/PaginaPanel"
 import { PaginaImportar } from "@/features/importar/PaginaImportar"
 import { PaginaConfiguracion } from "@/features/configuracion/PaginaConfiguracion"
 import { PaginaAyuda } from "@/features/ayuda/PaginaAyuda"
+
+/**
+ * Prefijo bajo el que se sirve la app. En GitHub Pages es "/crm-kodarvia/", en local "/".
+ * Sin él, al recargar en /crm-kodarvia/contactos el router no reconocería ninguna ruta.
+ */
+const BASE_RUTAS = import.meta.env.BASE_URL.replace(/\/$/, "")
 
 const UN_DIA = 24 * 60 * 60 * 1000
 /** Cambiar cuando cambie la forma de los datos cacheados para descartar la caché vieja. */
@@ -82,10 +86,8 @@ export default function App() {
   const queryClient = useMemo(crearQueryClient, [])
   const persister = useMemo(crearPersister, [])
 
-  if (!supabaseConfigurado) return <PantallaSinSupabase />
-
   const contenido = (
-    <BrowserRouter>
+    <BrowserRouter basename={BASE_RUTAS}>
       <Rutas />
     </BrowserRouter>
   )

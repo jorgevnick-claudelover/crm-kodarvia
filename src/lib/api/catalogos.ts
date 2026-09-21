@@ -1,5 +1,11 @@
-/** Catálogos: etapas, motivos de pérdida y orígenes. Solo el admin escribe (RLS). */
-import { supabase } from "@/lib/supabase"
+/**
+ * Catálogos: etapas, motivos de pérdida y orígenes, sobre el almacén local.
+ * Todos leen; solo el administrador escribe (antes lo imponía RLS, ahora
+ * `exigirAdmin` de `src/lib/reglas.ts`).
+ */
+import { ahora, escribir, leer, nuevoId } from "@/lib/almacen"
+import { ErrorRegla, exigirAdmin, marcarActualizado } from "@/lib/reglas"
+import { usuarioActual } from "@/lib/sesion"
 import type {
   Etapa,
   EtapaInsert,
@@ -11,7 +17,6 @@ import type {
   OrigenInsert,
   OrigenUpdate,
 } from "@/lib/types"
-import { lanzarSi, exigir } from "./comun"
 
 /** Colores disponibles para las etapas (nombres de Tailwind). */
 export const COLORES_ETAPA = ["slate", "sky", "teal", "emerald", "amber", "orange", "rose", "violet"] as const
@@ -19,109 +24,174 @@ export type ColorEtapa = (typeof COLORES_ETAPA)[number]
 
 // ---------- etapas ----------
 export async function listarEtapas(incluirInactivas = false): Promise<Etapa[]> {
-  let q = supabase.from("etapas").select("*").order("orden", { ascending: true })
-  if (!incluirInactivas) q = q.eq("activa", true)
-  const { data, error } = await q
-  lanzarSi(error, "No se pudieron cargar las etapas")
-  return data ?? []
+  return porOrden(leer().etapas.filter((e) => incluirInactivas || e.activa))
 }
 
 export async function crearEtapa(datos: Omit<EtapaInsert, "orden"> & { orden?: number }): Promise<Etapa> {
-  const orden = datos.orden ?? (await siguienteOrden("etapas"))
-  const { data, error } = await supabase
-    .from("etapas")
-    .insert({ ...datos, nombre: datos.nombre.trim(), orden })
-    .select("*")
-    .single()
-  lanzarSi(error, "No se pudo crear la etapa")
-  return exigir(data)
+  exigirAdmin(usuarioActual(), "crear etapas")
+  const momento = ahora()
+  return escribir((db) => {
+    const fila: Etapa = {
+      id: datos.id ?? nuevoId(),
+      nombre: datos.nombre.trim(),
+      orden: datos.orden ?? siguienteOrden(db.etapas),
+      color: datos.color ?? "slate",
+      activa: datos.activa ?? true,
+      created_at: datos.created_at ?? momento,
+      updated_at: datos.updated_at ?? momento,
+    }
+    db.etapas.push(fila)
+    return fila
+  })
 }
 
 export async function actualizarEtapa(id: string, cambios: EtapaUpdate): Promise<Etapa> {
-  const { data, error } = await supabase.from("etapas").update(cambios).eq("id", id).select("*").single()
-  lanzarSi(error, "No se pudo guardar la etapa")
-  return exigir(data)
+  exigirAdmin(usuarioActual(), "cambiar las etapas")
+  const momento = ahora()
+  return escribir((db) => {
+    const indice = db.etapas.findIndex((e) => e.id === id)
+    if (indice === -1) throw new ErrorRegla("Esa etapa ya no existe.")
+    const siguiente = marcarActualizado(fusionar(db.etapas[indice], cambios as Partial<Etapa>), momento)
+    siguiente.id = db.etapas[indice].id
+    if (cambios.nombre !== undefined) siguiente.nombre = cambios.nombre.trim()
+    db.etapas[indice] = siguiente
+    return siguiente
+  })
 }
 
 /** Reordena: el índice en el array pasa a ser el campo orden (empezando en 1). */
 export async function reordenarEtapas(ids: string[]): Promise<void> {
-  await reordenar("etapas", ids)
+  exigirAdmin(usuarioActual(), "cambiar el orden de las etapas")
+  const momento = ahora()
+  escribir((db) => {
+    reordenar(db.etapas, ids, momento)
+  })
 }
 
 // ---------- motivos_perdida ----------
 export async function listarMotivos(incluirInactivos = false): Promise<MotivoPerdida[]> {
-  let q = supabase.from("motivos_perdida").select("*").order("orden", { ascending: true })
-  if (!incluirInactivos) q = q.eq("activo", true)
-  const { data, error } = await q
-  lanzarSi(error, "No se pudieron cargar los motivos de pérdida")
-  return data ?? []
+  return porOrden(leer().motivos_perdida.filter((m) => incluirInactivos || m.activo))
 }
 
 export async function crearMotivo(datos: Omit<MotivoPerdidaInsert, "orden"> & { orden?: number }): Promise<MotivoPerdida> {
-  const orden = datos.orden ?? (await siguienteOrden("motivos_perdida"))
-  const { data, error } = await supabase
-    .from("motivos_perdida")
-    .insert({ ...datos, nombre: datos.nombre.trim(), orden })
-    .select("*")
-    .single()
-  lanzarSi(error, "No se pudo crear el motivo")
-  return exigir(data)
+  exigirAdmin(usuarioActual(), "crear motivos de pérdida")
+  const momento = ahora()
+  return escribir((db) => {
+    const fila: MotivoPerdida = {
+      id: datos.id ?? nuevoId(),
+      nombre: datos.nombre.trim(),
+      orden: datos.orden ?? siguienteOrden(db.motivos_perdida),
+      activo: datos.activo ?? true,
+      created_at: datos.created_at ?? momento,
+      updated_at: datos.updated_at ?? momento,
+    }
+    db.motivos_perdida.push(fila)
+    return fila
+  })
 }
 
 export async function actualizarMotivo(id: string, cambios: MotivoPerdidaUpdate): Promise<MotivoPerdida> {
-  const { data, error } = await supabase.from("motivos_perdida").update(cambios).eq("id", id).select("*").single()
-  lanzarSi(error, "No se pudo guardar el motivo")
-  return exigir(data)
+  exigirAdmin(usuarioActual(), "cambiar los motivos de pérdida")
+  const momento = ahora()
+  return escribir((db) => {
+    const indice = db.motivos_perdida.findIndex((m) => m.id === id)
+    if (indice === -1) throw new ErrorRegla("Ese motivo de pérdida ya no existe.")
+    const siguiente = marcarActualizado(fusionar(db.motivos_perdida[indice], cambios as Partial<MotivoPerdida>), momento)
+    siguiente.id = db.motivos_perdida[indice].id
+    if (cambios.nombre !== undefined) siguiente.nombre = cambios.nombre.trim()
+    db.motivos_perdida[indice] = siguiente
+    return siguiente
+  })
 }
 
 export async function reordenarMotivos(ids: string[]): Promise<void> {
-  await reordenar("motivos_perdida", ids)
+  exigirAdmin(usuarioActual(), "cambiar el orden de los motivos de pérdida")
+  const momento = ahora()
+  escribir((db) => {
+    reordenar(db.motivos_perdida, ids, momento)
+  })
 }
 
 // ---------- origenes ----------
 export async function listarOrigenes(incluirInactivos = false): Promise<Origen[]> {
-  let q = supabase.from("origenes").select("*").order("orden", { ascending: true })
-  if (!incluirInactivos) q = q.eq("activo", true)
-  const { data, error } = await q
-  lanzarSi(error, "No se pudieron cargar los orígenes")
-  return data ?? []
+  return porOrden(leer().origenes.filter((o) => incluirInactivos || o.activo))
 }
 
 export async function crearOrigen(datos: Omit<OrigenInsert, "orden"> & { orden?: number }): Promise<Origen> {
-  const orden = datos.orden ?? (await siguienteOrden("origenes"))
-  const { data, error } = await supabase
-    .from("origenes")
-    .insert({ ...datos, nombre: datos.nombre.trim(), orden })
-    .select("*")
-    .single()
-  lanzarSi(error, "No se pudo crear el origen")
-  return exigir(data)
+  exigirAdmin(usuarioActual(), "crear orígenes")
+  const momento = ahora()
+  return escribir((db) => {
+    const fila: Origen = {
+      id: datos.id ?? nuevoId(),
+      nombre: datos.nombre.trim(),
+      orden: datos.orden ?? siguienteOrden(db.origenes),
+      activo: datos.activo ?? true,
+      created_at: datos.created_at ?? momento,
+      updated_at: datos.updated_at ?? momento,
+    }
+    db.origenes.push(fila)
+    return fila
+  })
 }
 
 export async function actualizarOrigen(id: string, cambios: OrigenUpdate): Promise<Origen> {
-  const { data, error } = await supabase.from("origenes").update(cambios).eq("id", id).select("*").single()
-  lanzarSi(error, "No se pudo guardar el origen")
-  return exigir(data)
+  exigirAdmin(usuarioActual(), "cambiar los orígenes")
+  const momento = ahora()
+  return escribir((db) => {
+    const indice = db.origenes.findIndex((o) => o.id === id)
+    if (indice === -1) throw new ErrorRegla("Ese origen ya no existe.")
+    const siguiente = marcarActualizado(fusionar(db.origenes[indice], cambios as Partial<Origen>), momento)
+    siguiente.id = db.origenes[indice].id
+    if (cambios.nombre !== undefined) siguiente.nombre = cambios.nombre.trim()
+    db.origenes[indice] = siguiente
+    return siguiente
+  })
 }
 
 export async function reordenarOrigenes(ids: string[]): Promise<void> {
-  await reordenar("origenes", ids)
+  exigirAdmin(usuarioActual(), "cambiar el orden de los orígenes")
+  const momento = ahora()
+  escribir((db) => {
+    reordenar(db.origenes, ids, momento)
+  })
 }
 
 // ---------- internos ----------
-type TablaCatalogo = "etapas" | "motivos_perdida" | "origenes"
-
-async function siguienteOrden(tabla: TablaCatalogo): Promise<number> {
-  const { data, error } = await supabase.from(tabla).select("orden").order("orden", { ascending: false }).limit(1)
-  lanzarSi(error, "No se pudo calcular el orden")
-  const max = data?.[0]?.orden ?? 0
-  return max + 1
+/** Forma común de las tres tablas de catálogo. */
+interface FilaCatalogo {
+  id: string
+  nombre: string
+  orden: number
+  updated_at: string
 }
 
-async function reordenar(tabla: TablaCatalogo, ids: string[]): Promise<void> {
-  // Actualizaciones en paralelo; son pocas filas (catálogos de menos de 20 elementos).
-  const resultados = await Promise.all(
-    ids.map((id, indice) => supabase.from(tabla).update({ orden: indice + 1 }).eq("id", id)),
-  )
-  for (const r of resultados) lanzarSi(r.error, "No se pudo reordenar")
+/** Copia la fila aplicando solo las claves definidas de `cambios` (undefined = no tocar). */
+function fusionar<T extends object>(fila: T, cambios: Partial<T>): T {
+  const salida = { ...fila }
+  for (const clave of Object.keys(cambios) as (keyof T)[]) {
+    const valor = cambios[clave]
+    if (valor !== undefined) salida[clave] = valor as T[keyof T]
+  }
+  return salida
+}
+
+/** Antes: `order('orden')`. Desempate por nombre para que el orden sea estable. */
+function porOrden<T extends FilaCatalogo>(filas: T[]): T[] {
+  return filas.sort((a, b) => a.orden - b.orden || a.nombre.localeCompare(b.nombre, "es"))
+}
+
+function siguienteOrden(filas: readonly FilaCatalogo[]): number {
+  let maximo = 0
+  for (const fila of filas) if (fila.orden > maximo) maximo = fila.orden
+  return maximo + 1
+}
+
+/** El índice en `ids` pasa a ser el campo `orden` (empezando en 1). */
+function reordenar<T extends FilaCatalogo>(filas: T[], ids: readonly string[], momento: string): void {
+  ids.forEach((id, indice) => {
+    const posicion = filas.findIndex((f) => f.id === id)
+    if (posicion === -1) return
+    if (filas[posicion].orden === indice + 1) return
+    filas[posicion] = { ...filas[posicion], orden: indice + 1, updated_at: momento }
+  })
 }

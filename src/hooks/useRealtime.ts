@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
-import type { RealtimeChannel } from "@supabase/supabase-js"
-import { supabase, supabaseConfigurado } from "@/lib/supabase"
+import { suscribirse } from "@/lib/almacen"
 
-/** Tablas con publicación realtime (docs/ARQUITECTURA.md sección 7). */
+/** Tablas que la app vigila para refrescar sus consultas (docs/ARQUITECTURA.md sección 7). */
 export const TABLAS_REALTIME = [
   "contactos",
   "oportunidades",
@@ -18,18 +17,20 @@ export const TABLAS_REALTIME = [
 export type TablaRealtime = (typeof TABLAS_REALTIME)[number]
 
 /** Claves adicionales que hay que invalidar cuando cambia una tabla. */
-const CLAVES_DERIVADAS: Partial<Record<TablaRealtime, string[]>> = {
+const CLAVES_DERIVADAS: Record<string, string[]> = {
   contactos: ["buscar"],
   oportunidades: ["buscar", "historial_etapas"],
   tareas: ["buscar", "recordatorios"],
   actividades: ["buscar"],
+  historial_etapas: ["historial_etapas"],
 }
 
 export type EstadoCanal = "inactivo" | "conectando" | "conectado" | "error" | "cerrado"
 
 /**
- * Estado compartido del canal, legible fuera de React: el QueryClient usa
- * `realtime.conectado` para activar refetchInterval de respaldo cuando no hay canal.
+ * Estado compartido, legible fuera de React: el QueryClient usa `realtime.conectado`
+ * para activar el refetch de respaldo cuando no hay canal. Con el almacén local
+ * siempre estamos "conectados" mientras el hook está montado.
  */
 export const realtime: { conectado: boolean; estado: EstadoCanal } = { conectado: false, estado: "inactivo" }
 
@@ -39,22 +40,26 @@ export interface EstadoRealtime {
 }
 
 /**
- * Un canal postgres_changes sobre las tablas indicadas. Cada evento invalida las
- * consultas de esa tabla (queryKey[0] = tabla). Se monta una sola vez en AppShell.
+ * Propaga los cambios del almacén local a TanStack Query. Cada aviso trae las
+ * tablas tocadas y se invalidan sus consultas (queryKey[0] = tabla). Cubre esta
+ * pestaña y las demás ventanas del mismo navegador (criterio 2). Se monta una
+ * sola vez en AppShell.
  */
 export function useRealtime(activo = true): EstadoRealtime {
   const queryClient = useQueryClient()
   const [estado, setEstado] = useState<EstadoCanal>("inactivo")
 
   useEffect(() => {
-    if (!activo || !supabaseConfigurado) return
+    if (!activo) return
     const pendientes = new Set<string>()
     let temporizador: ReturnType<typeof setTimeout> | null = null
 
     // Agrupa invalidaciones en 150 ms para no disparar cientos de refetch durante una importación.
-    const programar = (tabla: TablaRealtime) => {
-      pendientes.add(tabla)
-      for (const clave of CLAVES_DERIVADAS[tabla] ?? []) pendientes.add(clave)
+    const programar = (tablas: string[]) => {
+      for (const tabla of tablas) {
+        pendientes.add(tabla)
+        for (const clave of CLAVES_DERIVADAS[tabla] ?? []) pendientes.add(clave)
+      }
       if (temporizador) return
       temporizador = setTimeout(() => {
         temporizador = null
@@ -69,20 +74,12 @@ export function useRealtime(activo = true): EstadoRealtime {
       setEstado(nuevo)
     }
 
-    cambiarEstado("conectando")
-    let canal: RealtimeChannel = supabase.channel("crm-cambios")
-    for (const tabla of TABLAS_REALTIME) {
-      canal = canal.on("postgres_changes", { event: "*", schema: "public", table: tabla }, () => programar(tabla))
-    }
-    canal.subscribe((status) => {
-      if (status === "SUBSCRIBED") cambiarEstado("conectado")
-      else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") cambiarEstado("error")
-      else if (status === "CLOSED") cambiarEstado("cerrado")
-    })
+    const cancelar = suscribirse(programar)
+    cambiarEstado("conectado")
 
     return () => {
       if (temporizador) clearTimeout(temporizador)
-      void supabase.removeChannel(canal)
+      cancelar()
       cambiarEstado("inactivo")
     }
   }, [activo, queryClient])

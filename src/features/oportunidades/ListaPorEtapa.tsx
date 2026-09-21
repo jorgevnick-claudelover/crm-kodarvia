@@ -140,7 +140,7 @@ export function ListaPorEtapa({ filtros, setFiltros, className }: ListaPorEtapaP
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {tarjetas.map((o) => {
             const sig = siguienteEtapa(etapas, o.etapa_id)
-            // Mismo permiso que el tablero (Tablero.tsx): sin él la acción siempre falla por RLS.
+            // Mismo permiso que el tablero (Tablero.tsx): sin él la acción siempre falla al guardar.
             const mio = esAdmin || (!!uid && o.responsable_id === uid)
             return (
               <TarjetaOportunidad

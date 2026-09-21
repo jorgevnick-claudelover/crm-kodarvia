@@ -1,5 +1,7 @@
 # Decisiones de base de datos
 
+> **Documento histórico (hasta el 21/09/2026).** Describe la base de datos en Supabase que el cliente pidió eliminar; la carpeta `supabase/` ya no existe. Se conserva porque explica de dónde salen las reglas que hoy viven en `src/lib/reglas.ts`. Ver `docs/DECISIONES.md`, entrada del 2026-09-21.
+
 Decisiones tomadas al escribir `supabase/migrations/0001_init.sql` y la integración con Kodarvia. Complementa `docs/DECISIONES.md` (decisiones generales). Fecha: 12 de septiembre de 2026.
 
 ## Entorno y validación

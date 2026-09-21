@@ -1,7 +1,7 @@
 /**
  * Lógica PURA de la importación (criterio 6): detectar cabecera, sugerir mapeo,
  * normalizar filas, detectar duplicados y planificar qué pasa con cada fila.
- * Nada de supabase ni de React aquí: todo se prueba en mapeo.test.ts.
+ * Nada de acceso a datos ni de React aquí: todo se prueba en mapeo.test.ts.
  *
  * Regla de oro: cero filas descartadas. Toda fila no vacía acaba en el CRM como
  * creada, fusionada o creada-para-revisar, y el informe dice por qué.

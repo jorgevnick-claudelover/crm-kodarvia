@@ -1,18 +1,17 @@
 /**
  * Paginación de contactos para el módulo de contactos (carga incremental de 50 en 50).
- * Reutiliza aplicarFiltrosContactos para que la lista, la página siguiente y la
- * exportación (listarTodo) apliquen exactamente los mismos filtros (criterio 7).
+ * Se apoya en `listarTodo` para que la lista, la página siguiente y la exportación
+ * apliquen exactamente los mismos filtros y el mismo orden (criterio 7).
  */
-import { supabase } from "@/lib/supabase"
 import type { ContactoConRelaciones } from "@/lib/types"
-import { lanzarSi, resumenTareasPendientes } from "./comun"
-import { type FiltrosContactos, SELECT_CONTACTO, aplicarFiltrosContactos, contextoFiltrosContactos } from "./contactos"
+import { resumenTareasPendientes } from "./comun"
+import { type FiltrosContactos, listarTodo } from "./contactos"
 
 export const TAMANO_PAGINA_CONTACTOS = 50
 
 export interface PaginaContactos {
   filas: ContactoConRelaciones[]
-  /** Total de filas que cumplen los filtros (count exact). */
+  /** Total de filas que cumplen los filtros. */
   total: number
   /** Índice de la primera fila de esta página. */
   desde: number
@@ -24,16 +23,8 @@ export async function listarPagina(
   desde = 0,
   limite = TAMANO_PAGINA_CONTACTOS,
 ): Promise<PaginaContactos> {
-  const ctx = await contextoFiltrosContactos(filtros)
-  const { data, error, count } = await aplicarFiltrosContactos(
-    supabase.from("contactos").select(SELECT_CONTACTO, { count: "exact" }),
-    filtros,
-    ctx,
-  )
-    .range(desde, desde + limite - 1)
-    .overrideTypes<ContactoConRelaciones[], { merge: false }>()
-  lanzarSi(error, "No se pudieron cargar los contactos")
-  return { filas: data ?? [], total: count ?? (data?.length ?? 0), desde }
+  const todas = await listarTodo(filtros)
+  return { filas: todas.slice(desde, desde + limite), total: todas.length, desde }
 }
 
 /** Ids (como arrays, serializables en la caché) de contactos con tarea pendiente o vencida. */

@@ -1,7 +1,8 @@
 /**
  * Recordatorios vencidos y no vistos del usuario actual (criterio 4).
- * Consulta la rpc recordatorios_pendientes_usuario cada 30 s; realtime invalida
- * ['tareas'] (y por tanto ['tareas', 'recordatorios']) en cuanto cambia una tarea.
+ * Lee el almacén local cada 30 s como red de seguridad; cualquier cambio en una tarea
+ * invalida ['tareas'] (y por tanto ['tareas', 'recordatorios']) al instante.
+ * No hay cola ni correo: el recordatorio está programado en la tarea y se avisa aquí.
  */
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useUsuarioActual } from "@/hooks/useUsuarioActual"

@@ -4,6 +4,8 @@ Fecha: 12 de septiembre de 2026. Entrega prevista: 3 de octubre de 2026.
 
 Las marcadas con ★ bloquean alguna parte de la entrega. El resto se pueden responder más adelante, pero cuanto antes mejor.
 
+> **Actualización del 21/09/2026.** Kodarvia respondió por escrito a varias de estas: React con `localStorage` y sin backend, los recordatorios basta con dejarlos programados y visibles en la app, y el proyecto vive en GitHub (se publica en GitHub Pages). Eso deja sin objeto las preguntas sobre el envío de los recordatorios, sobre Supabase y sobre el hosting. Ver `docs/DECISIONES.md`, entradas del 2026-09-21.
+
 ---
 
 ## A Kodarvia

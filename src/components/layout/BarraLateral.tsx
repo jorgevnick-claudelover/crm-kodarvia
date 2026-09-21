@@ -23,7 +23,7 @@ export function BarraLateral() {
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground md:flex" aria-label="Barra lateral">
       <Link to="/" className="flex h-14 items-center gap-2 border-b px-4">
-        <img src="/favicon.svg" alt="" className="size-8 rounded-lg" />
+        <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="size-8 rounded-lg" />
         <span className="text-base font-semibold">CRM Gestoría</span>
       </Link>
       <nav className="flex-1 space-y-1 p-3" aria-label="Secciones">

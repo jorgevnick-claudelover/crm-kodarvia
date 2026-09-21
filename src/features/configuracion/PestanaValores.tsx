@@ -166,7 +166,7 @@ export function PestanaValores() {
           placeholder="https://crm.miestudio.pe"
           onChange={(e) => cambiar("url_app", e.target.value)}
         />
-        <p className="text-sm text-muted-foreground">Se usa en los enlaces de los correos de recordatorio que envía Kodarvia.</p>
+        <p className="text-sm text-muted-foreground">La dirección pública del CRM, para compartirla con el equipo. Ya no se envían correos: los recordatorios avisan dentro de la app.</p>
       </div>
 
       <div className="flex justify-end">

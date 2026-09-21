@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { type ColumnaCSV, descargarCSV, generarCSV, nombreArchivoExportacion } from "@/lib/utils/csv"
 
 export interface BotonExportarProps {
-  /** Devuelve TODAS las filas a exportar con los filtros actuales (usar listarTodo + fetchAll). */
+  /** Devuelve TODAS las filas a exportar con los filtros actuales (usar listarTodo). */
   obtenerFilas: () => Promise<Record<string, unknown>[]>
   columnas: ColumnaCSV[]
   /** Prefijo del archivo: 'contactos', 'oportunidades', 'tareas'. */

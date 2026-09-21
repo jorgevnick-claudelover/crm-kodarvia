@@ -56,7 +56,7 @@ const columnas: ColumnaHoja[] = columnasDeHoja(hojaContactos.filas, indiceCabece
 const mapeo: Mapeo = sugerirMapeo(columnas)
 const filas: FilaNormalizada[] = normalizarFilas(hojaContactos.filas, indiceCabecera, mapeo, columnas)
 
-/** Catálogos como los deja supabase/seed.sql, con dos vendedoras y un administrador. */
+/** Catálogos como los deja la semilla (src/lib/semilla.ts), con dos vendedoras y un administrador. */
 const catalogos: CatalogosImportacion = {
   etapas: [
     { id: "e1", nombre: "Nuevo contacto" },

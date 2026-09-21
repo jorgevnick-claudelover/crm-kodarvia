@@ -2,6 +2,8 @@
 
 Se marca cada punto antes de enviar la entrega a Kodarvia. Fecha límite: 3 de octubre de 2026.
 
+> **Pendiente de repasar tras el cambio de encargo del 21/09/2026.** Los puntos que hablan de Supabase, de Cloudflare, de crear usuarios con un script o de la cola de recordatorios ya no aplican: no hay backend, el hosting es GitHub Pages y los cinco usuarios vienen con los datos de ejemplo. Lo que sí hay que comprobar está en `docs/ACEPTACION.md`.
+
 ## Cuentas y propiedad
 
 - [ ] Decidido con Kodarvia y el cliente en qué cuentas viven el repositorio, Supabase y Cloudflare Pages (ver PREGUNTAS.md).

@@ -1,10 +1,10 @@
 /**
- * Paso 4 del asistente: lleva a la base de datos el plan calculado en mapeo.ts.
+ * Paso 4 del asistente: lleva al almacén local el plan calculado en mapeo.ts.
  *
  * Orden: crear los orígenes y etapas que faltan → registrar la fila de `importaciones`
- * → insertar los contactos en lotes de 200 (con importacion_id, fila_origen y extra)
- * → actualizar los contactos fusionados → crear las oportunidades → guardar recuentos
- * e informe. Ninguna fila no vacía se queda fuera (criterio 6).
+ * → meter contactos y oportunidades de una sola vez (con importacion_id, fila_origen
+ * y extra) → actualizar los contactos fusionados → guardar recuentos e informe.
+ * Ninguna fila no vacía se queda fuera (criterio 6).
  */
 import * as apiCatalogos from "@/lib/api/catalogos"
 import * as apiContactos from "@/lib/api/contactos"
@@ -16,7 +16,7 @@ import type {
   Json,
   OportunidadInsert,
 } from "@/lib/types"
-import { insertarContactosEnLotes, insertarOportunidadesEnLotes, nuevoId } from "./apiImportar"
+import { insertarImportacion, nuevoId } from "./apiImportar"
 import {
   type CatalogosImportacion,
   type ColumnaHoja,
@@ -139,7 +139,7 @@ export async function ejecutarImportacion(opciones: OpcionesEjecucion): Promise<
     return catalogos.adminId
   }
 
-  // 3. Contactos en lotes de 200.
+  // 3. Contactos que se crean (los fusionados se actualizan más abajo).
   const idPorFila = new Map<number, string>()
   const inserts: ContactoInsert[] = []
   for (const p of conContacto) {
@@ -164,42 +164,13 @@ export async function ejecutarImportacion(opciones: OpcionesEjecucion): Promise<
       importacion_id: importacion.id,
       fila_origen: p.fila,
       requiere_revision: c.requiere_revision,
-      // Siempre presente: en una inserción por lotes PostgREST unifica las claves de todas
-      // las filas y rellena con NULL las que falten, saltándose el default de la columna.
+      // Siempre presente: el almacén no pone valores por defecto, así que toda fila
+      // llega con su fecha (la de la hoja si se mapeó, si no la de ahora).
       created_at: c.created_at ?? ahora,
     })
   }
-  avisar(`Creando ${inserts.length} contactos`)
-  const baseContactos = hechos
-  await insertarContactosEnLotes(inserts, (insertados) => {
-    hechos = baseContactos + insertados
-    avisar(`Creando contactos (${insertados} de ${inserts.length})`)
-  })
-  hechos = baseContactos + inserts.length
 
-  // 4. Fusiones: rellenar huecos de los contactos que ya estaban en el CRM.
-  const porId = new Map(existentes.map((c) => [c.id, c]))
-  const idFusion = new Map<number, string>()
-  for (const p of fusiones) {
-    const destino = p.fusionarCon
-    if (!destino) continue
-    if (destino.origen === "archivo") {
-      const id = idPorFila.get(destino.fila)
-      if (id) idFusion.set(p.fila, id)
-      hechos += 1
-      continue
-    }
-    idFusion.set(p.fila, destino.id)
-    const existente = porId.get(destino.id)
-    if (existente) {
-      const cambios = calcularFusion(existente, p.datos)
-      if (Object.keys(cambios).length > 0) await apiContactos.actualizar(destino.id, cambios)
-    }
-    hechos += 1
-    avisar(`Actualizando duplicados (fila ${p.fila})`)
-  }
-
-  // 5. Oportunidades (solo si se mapeó etapa, importe, estado o título).
+  // 4. Oportunidades (solo si se mapeó etapa, importe, estado o título).
   const primeraEtapa = catalogos.etapas[0]?.id ?? null
   const oportunidades: OportunidadInsert[] = []
   for (const p of conOportunidad) {
@@ -226,17 +197,35 @@ export async function ejecutarImportacion(opciones: OpcionesEjecucion): Promise<
       created_at: o.created_at ?? ahora,
     })
   }
-  if (oportunidades.length > 0) {
-    avisar(`Creando ${oportunidades.length} oportunidades`)
-    const baseOportunidades = hechos
-    await insertarOportunidadesEnLotes(oportunidades, (insertados) => {
-      hechos = baseOportunidades + insertados
-      avisar(`Creando oportunidades (${insertados} de ${oportunidades.length})`)
-    })
-    hechos = baseOportunidades + oportunidades.length
+
+  // 5. Una sola escritura: contactos y oportunidades entran juntos o no entra nada.
+  avisar(`Creando ${inserts.length} contactos y ${oportunidades.length} oportunidades`)
+  insertarImportacion(inserts, oportunidades)
+  hechos += inserts.length + oportunidades.length
+
+  // 6. Fusiones: rellenar huecos de los contactos que ya estaban en el CRM.
+  const porId = new Map(existentes.map((c) => [c.id, c]))
+  const idFusion = new Map<number, string>()
+  for (const p of fusiones) {
+    const destino = p.fusionarCon
+    if (!destino) continue
+    if (destino.origen === "archivo") {
+      const id = idPorFila.get(destino.fila)
+      if (id) idFusion.set(p.fila, id)
+      hechos += 1
+      continue
+    }
+    idFusion.set(p.fila, destino.id)
+    const existente = porId.get(destino.id)
+    if (existente) {
+      const cambios = calcularFusion(existente, p.datos)
+      if (Object.keys(cambios).length > 0) await apiContactos.actualizar(destino.id, cambios)
+    }
+    hechos += 1
+    avisar(`Actualizando duplicados (fila ${p.fila})`)
   }
 
-  // 6. Informe fila a fila y recuentos definitivos.
+  // 7. Informe fila a fila y recuentos definitivos.
   const informe: FilaInformeCSV[] = plan.filas.map((p) => ({
     fila: p.fila,
     resultado: ETIQUETA_RESULTADO[p.resultado],

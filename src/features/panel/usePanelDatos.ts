@@ -21,7 +21,7 @@ export interface DatosPanel {
 const VACIO: never[] = []
 
 /**
- * Carga todo lo que necesita el panel (fetchAll) y lo cachea por tabla, así el
+ * Carga todo lo que necesita el panel (listarTodo) y lo cachea por tabla, así el
  * realtime lo invalida por queryKey[0]. El historial se pide desde `desdeHistorial`
  * (el más antiguo entre el rango y el mes del embudo) hasta hoy.
  */

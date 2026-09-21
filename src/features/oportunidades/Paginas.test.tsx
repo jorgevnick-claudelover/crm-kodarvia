@@ -1,6 +1,6 @@
 /**
  * Prueba de humo: las pantallas del módulo renderizan con datos simulados
- * (sin Supabase) tanto en computadora (tablero) como en celular (lista por etapa).
+ * (con la capa de datos simulada) tanto en computadora (tablero) como en celular (lista por etapa).
  */
 import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
@@ -100,7 +100,6 @@ const historial: HistorialEtapa[] = [
   { id: 1, oportunidad_id: "op1", de_etapa_id: null, a_etapa_id: "e1", de_estado: null, a_estado: "abierta", usuario_id: "u1", created_at: "2026-09-01T15:00:00Z" },
 ]
 
-vi.mock("@/lib/supabase", () => ({ supabase: {}, supabaseConfigurado: false }))
 // Sesión mutable: algunas pruebas necesitan un miembro que no es responsable de las tarjetas.
 const sesion = vi.hoisted(() => ({ uid: "u1" as string | null, esAdmin: true }))
 vi.mock("@/hooks/useUsuarioActual", () => ({
